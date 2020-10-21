@@ -1,0 +1,41 @@
+
+
+with "xmlada";
+with "adasockets";
+with "../dynamic-strings/dstrings";
+project Urine_Records is
+
+   type Hware_Option is ("sparc", "amd64", "x86", "pi");
+   Hware : Hware_Option := external ("hware", "amd64");
+
+   for Languages use ("ada");
+   case Hware is
+   when "pi" =>
+      for Source_Dirs use ("src/", "src/pi/", "../tools/");
+   when others =>
+      for Source_Dirs use ("src/", "src/non_pi/", "../tools/");
+   end case;
+   for Main use ("urine_records.adb");
+   --  Using "hware" variable for obj directory
+   for Object_Dir use "obj_" & hware & "/";
+
+   package Ide is
+      for Documentation_Dir use "doc/";
+   end Ide;
+
+   for Source_Files use ("error_log.adb",
+      "error_log.ads", "general_storage_pool.adb", "general_storage_pool.ads",
+      "switch_types.ads", "switch_database.ads", "switch_database.adb", 
+      "lights_control.ads", "lights_control.adb", "light_switch_version.ads", 
+      "light_switch_functions.ads", "light_switch_functions.adb", 
+      "basic_lights_interface.ads", "basic_lights_interface.adb", 
+      "host_functions.ads", "host_functions.adb", "host_functions_thin.ads", 
+      "generic_command_parameters.ads", "generic_command_parameters.adb", 
+      "interlocks.ads", "interlocks.adb",
+      "calendar_extensions.adb", "calendar_extensions.ads", 
+      "dynamic_lists.adb", "dynamic_lists.ads", 
+      "string_conversions.ads", "string_conversions.adb",
+      "wiring_pi.ads", "wiring_pi.adb",
+      "generic_versions.ads", "generic_versions.adb", "light_switches.adb");
+
+end Urine_Records;
