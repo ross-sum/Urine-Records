@@ -1,8 +1,8 @@
  -----------------------------------------------------------------------
 --                                                                   --
---                       U R I N E _ R E C O R D S                   --
+--               U R I N E _ R E C O R D _ V E R S I O N             --
 --                                                                   --
---                               B o d y                             --
+--                     S p e c i f i c a t i o n                     --
 --                                                                   --
 --                           $Revision: 1.0 $                        --
 --                                                                   --
@@ -30,41 +30,23 @@
 --  Suite 330, Boston, MA 02111-1307, USA.                           --
 --                                                                   --
 -----------------------------------------------------------------------
+   with Generic_Versions;
+package Urine_Record_Version is
 
-with Gtk.Main, Gtk.Window;
-with Urine_Record_Version;
+   package Urine_Record_Versions is new Generic_Versions
+   ("1.0.0", "Urine_Records");
 
-procedure Urine_Records is
-   Window : Gtk.Window.Gtk_Window;
+   function Version return wide_string 
+   renames Urine_Record_Versions.Version;
+   function Application_Title return wide_string
+   renames Urine_Record_Versions.Application_Title;
+   function Application_Name return wide_string
+   renames Urine_Record_Versions.Application_Name;
+   function Computer_Name return wide_string
+   renames Urine_Record_Versions.Computer_Name;
+   procedure Register(revision, for_module : in wide_string)
+   renames Urine_Record_Versions.Register;
+   function Revision_List return wide_string
+   renames Urine_Record_Versions.Revision_List;
 
-   default_log_file_name : constant wide_string := 
-                           "/var/log/urine_records.log";
-   default_db_name       : constant wide_string := 
-                           "/var/local/urine_records.db";
-   
-   package Parameters is new Generic_Command_Parameters
-      (Urine_Record_Version.Version,
-       "p,port,integer,5000,local port number to listen on;" &
-       "x,db,string,"& default_db_name &
-                 ",file name for the switch database XML;"&
-       "l,log,string," & default_log_file_name & 
-                 ",log file name with optional path;" &
-       "d,debug,integer,0,debug level (0=none, 9=max)",
-       0, false);
-   use Parameters;
-
-
-begin
-   Urine_Record_Version.Register(revision => "$Revision: 1.0 $",
-      for_module => "Urine_Records");
-   if  Parameters.is_invalid_parameter or
-   Parameters.is_help_parameter or
-   Parameters.is_version_parameter then
-      -- abort Urine_Records;
-      return;
-   end if;
-   Gtk.Main.Init;
-   Gtk.Window.Gtk_New (Window);
-   Gtk.Window.Show (Window);
-   Gtk.Main.Main;
-end Urine_Records;
+end Urine_Record_Version;

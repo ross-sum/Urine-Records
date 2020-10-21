@@ -16,7 +16,11 @@ s#l0
 s#m0src
 s#p0doc
 s#r0obj_amd64
-!28;g
+!63;g
+%\011src%surine_record_version.ads
 %\011src%surine_records.adb
-!28;f
+!63;f
+%\011src%surine_record_version.ads
 %\011src%surine_records.adb
+!23;l
+%\011urine_records.gpr

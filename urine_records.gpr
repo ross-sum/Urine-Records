@@ -1,5 +1,35 @@
-
-
+   -----------------------------------------------------------------------
+   --                                                                   --
+   --                       U R I N E _ R E C O R D S                   --
+   --                                                                   --
+   --                             P r o j e c t                         --
+   --                                                                   --
+   --                           $Revision: 1.0 $                        --
+   --                                                                   --
+   --  Copyright (C) 2020  Hyper Quantum Pty Ltd.                       --
+   --  Written by Ross Summerfield.                                     --
+   --                                                                   --
+   --  This  application  records both catheter  volumes  and  bladder  --
+   --  volumes  for a patient or patients that have undergone  radical  --
+   --  prostatectomy  (removal  of  the  prostate).    The   urologist  --
+   --  typically wants to track the volumes to monitor recovery.        --
+   --                                                                   --
+   --  Version History:                                                 --
+   --  $Log$
+   --                                                                   --
+   --  Urine_Records is free software; you can redistribute it  and/or  --
+   --  modify  it under terms of the GNU  General  Public  Licence  as  --
+   --  published by the Free Software Foundation; either version 2, or  --
+   --  (at   your  option)  any  later  version.    Urine_Records   is  --
+   --  distributed  in  hope that it will be useful, but  WITHOUT  ANY  --
+   --  WARRANTY; without even the implied warranty of  MERCHANTABILITY  --
+   --  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public  --
+   --  Licence for  more details.  You should have received a copy  of  --
+   --  the GNU General Public Licence distributed with  Urine_Records.  --
+   --  If not, write to the Free Software Foundation, 59 Temple Place-  --
+   --  Suite 330, Boston, MA 02111-1307, USA.                           --
+   --                                                                   --
+   -----------------------------------------------------------------------
 with "xmlada";
 with "adasockets";
 with "../dynamic-strings/dstrings";
@@ -25,17 +55,12 @@ project Urine_Records is
 
    for Source_Files use ("error_log.adb",
       "error_log.ads", "general_storage_pool.adb", "general_storage_pool.ads",
-      "switch_types.ads", "switch_database.ads", "switch_database.adb", 
-      "lights_control.ads", "lights_control.adb", "light_switch_version.ads", 
-      "light_switch_functions.ads", "light_switch_functions.adb", 
-      "basic_lights_interface.ads", "basic_lights_interface.adb", 
       "host_functions.ads", "host_functions.adb", "host_functions_thin.ads", 
       "generic_command_parameters.ads", "generic_command_parameters.adb", 
-      "interlocks.ads", "interlocks.adb",
       "calendar_extensions.adb", "calendar_extensions.ads", 
       "dynamic_lists.adb", "dynamic_lists.ads", 
       "string_conversions.ads", "string_conversions.adb",
-      "wiring_pi.ads", "wiring_pi.adb",
-      "generic_versions.ads", "generic_versions.adb", "light_switches.adb");
+      "generic_versions.ads","generic_versions.adb","urine_record_version.ads",
+      "urine_records.adb");
 
 end Urine_Records;
