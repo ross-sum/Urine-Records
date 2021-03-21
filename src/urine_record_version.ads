@@ -26,11 +26,11 @@
 --  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public  --
 --  Licence for  more details.  You should have received a copy  of  --
 --  the GNU General Public Licence distributed with  Urine_Records.  --
---  If not, write to the Free Software Foundation, 59 Temple Place-  --
---  Suite 330, Boston, MA 02111-1307, USA.                           --
+--  If  not,  write to the Free Software  Foundation,  51  Franklin  --
+--  Street, Fifth Floor, Boston, MA 02110-1301, USA.                 --
 --                                                                   --
 -----------------------------------------------------------------------
-   with Generic_Versions;
+with Generic_Versions;
 package Urine_Record_Version is
 
    package Urine_Record_Versions is new Generic_Versions
