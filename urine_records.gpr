@@ -26,12 +26,13 @@
    --  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public  --
    --  Licence for  more details.  You should have received a copy  of  --
    --  the GNU General Public Licence distributed with  Urine_Records.  --
-   --  If not, write to the Free Software Foundation, 59 Temple Place-  --
-   --  Suite 330, Boston, MA 02111-1307, USA.                           --
+   --  If  not,  write to the Free Software  Foundation,  51  Franklin  --
+   --  Street, Fifth Floor, Boston, MA 02110-1301, USA.                 --
    --                                                                   --
    -----------------------------------------------------------------------
-with "xmlada";
+with "gtkada";
 with "adasockets";
+with "gnatcoll", "gnatcoll_sql", "gnatcoll_sqlite";
 with "../dynamic-strings/dstrings";
 project Urine_Records is
 
@@ -41,9 +42,9 @@ project Urine_Records is
    for Languages use ("ada");
    case Hware is
    when "pi" =>
-      for Source_Dirs use ("src/", "src/pi/", "../tools/");
+      for Source_Dirs use ("src/", "../tools/");
    when others =>
-      for Source_Dirs use ("src/", "src/non_pi/", "../tools/");
+      for Source_Dirs use ("src/", "../tools/");
    end case;
    for Main use ("urine_records.adb");
    --  Using "hware" variable for obj directory
@@ -53,14 +54,28 @@ project Urine_Records is
       for Documentation_Dir use "doc/";
    end Ide;
 
-   for Source_Files use ("error_log.adb",
-      "error_log.ads", "general_storage_pool.adb", "general_storage_pool.ads",
+   for Source_Files use ("error_log.ads", "error_log.adb",
       "host_functions.ads", "host_functions.adb", "host_functions_thin.ads", 
-      "generic_command_parameters.ads", "generic_command_parameters.adb", 
-      "calendar_extensions.adb", "calendar_extensions.ads", 
-      "dynamic_lists.adb", "dynamic_lists.ads", 
+      "gnatcoll-sql_date_and_time.ads", "gnatcoll-sql_date_and_time.adb",
+      "gnatcoll-sql_blob.ads", "gnatcoll-sql_blob.adb",
+      "database_names.ads", "database.ads", "database.adb",
+      "calendar_extensions.ads", "calendar_extensions.adb", 
+      "interlocks.ads", "interlocks.adb", "string_functions.ads", "string_functions.adb",
       "string_conversions.ads", "string_conversions.adb",
+      "generic_command_parameters.ads", "generic_command_parameters.adb", 
+      "general_storage_pool.adb", "general_storage_pool.ads",
+      "dynamic_lists.adb", "dynamic_lists.ads", 
       "generic_versions.ads","generic_versions.adb","urine_record_version.ads",
+      "main_menu.ads", "main_menu.adb",
+      "help_about.ads", "help_about.adb",
+      "help_manual.ads", "help_manual.adb",
+      "error_dialogue.ads", "error_dialogue.adb",
+      "get_date_calendar.ads", "get_date_calendar.adb",
+      "urine_colour_selector.ads", "urine_colour_selector.adb",
+      "patient_details.ads", "patient_details.adb",
+      "catheter_urine_records_form.ads", "catheter_urine_records_form.adb",
+      "urine_records_form.ads", "urine_records_form.adb",
+      "report_processor.ads", "report_processor.adb",
       "urine_records.adb");
 
 end Urine_Records;
