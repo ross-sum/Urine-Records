@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /usr/local/bin
+/usr/local/bin/urine_records.real --db /home/ross/data/prostate/urine_records.db --debug 2 --log /tmp/urine_records.log
+
