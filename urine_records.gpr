@@ -70,6 +70,7 @@ project Urine_Records is
       "help_about.ads", "help_about.adb",
       "help_manual.ads", "help_manual.adb",
       "error_dialogue.ads", "error_dialogue.adb",
+      "check_for_deletion.ads", "check_for_deletion.adb",
       "get_date_calendar.ads", "get_date_calendar.adb",
       "urine_colour_selector.ads", "urine_colour_selector.adb",
       "patient_details.ads", "patient_details.adb",

@@ -10,7 +10,13 @@
 --  Written by Ross Summerfield.                                     --
 --                                                                   --
 --  This package displays the urine records data entry form,  which  --
---  contains .                                                     --
+--  contains information around each urination event. That includes  --
+--  the volume, the pad weight (when a pad is changed), the kind of  --
+--  pad  change, whether any urges or spasms were  experienced  and  --
+--  how many, and whether a bowel motion was involved.  For spasms,  --
+--  the  intensity  as measured through the amount of  overflow  is  --
+--  recorded.   These  details  are recorded for the  time  of  the  --
+--  urination event.                                                 --
 --                                                                   --
 --  A big thank you to Kevin O'Kane for his You Tube videos on  how  --
 --  to use Glade.  Whilst his stuff is all in C, the information is  --
@@ -53,6 +59,7 @@ with GNATCOLL.SQL_Date_and_Time; use GNATCOLL.SQL_Date_and_Time;
 with GNATCOLL.SQL;               use GNATCOLL.SQL;
 with Database;                   use Database;
 with Get_Date_Calendar;
+with Check_For_Deletion;
 with Error_Dialogue;
 with dStrings;
 package body Urine_Records_Form is
@@ -73,6 +80,7 @@ package body Urine_Records_Form is
    --       end record;
 
    DB              : GNATCOLL.SQL.Exec.Database_Connection;
+   number_of_patients: natural := 0;
    -- Set up all the prepared queries
    UR_select       : constant GNATCOLL.SQL.Exec.Prepared_Statement :=
       GNATCOLL.SQL.Exec.Prepare 
@@ -476,18 +484,27 @@ package body Urine_Records_Form is
       Q_leak     : SQL_Query;
       Q_hold     : SQL_Query;
       Q_spasm    : SQL_Query;
+      R_pd       : Forward_Cursor;
       rec_no     : record_movement(relative);
    begin
-   -- Set up: Open the relevant tables from the database
+      -- Set up: Open the relevant tables from the database
       DB:=GNATCOLL.SQL.Exec.Tasking.Get_Task_Connection(Description=>DB_Descr);
-   -- Set up: load up the list of patients
+      -- Set up: load up the list of patients
       Q_pd := SQL_Select
          (Fields  => PatientDetails.Identifier & PatientDetails.Patient,
           From    => PatientDetails,
           Where   => PatientDetails.Identifier >= 0,
           Order_By=> PatientDetails.Patient);
       Load_Combo_Box(Q_lookup=> Q_pd, list_store_name => "liststore_patients");
-   -- Set up: load up the list of Pad Types
+      -- Set up: count the number of patients
+      Q_pd:= SQL_Select(Fields=> Apply(Func_Count,(PatientDetails.Identifier)),
+                        From  => PatientDetails,
+                        Where => PatientDetails.Identifier >= 0);
+      R_pd.Fetch (Connection => DB, Query => Q_pd);
+      if Success(DB) and then Has_Row(R_pd) then
+         number_of_patients:= Integer_Value (R_pd, 0);
+      end if;
+      -- Set up: load up the list of Pad Types
       Q_ptype := SQL_Select
             (Fields => PadSizes.ID & PadSizes.Brand & 
                        PadSizes.Size & PadSizes.Description,
@@ -496,32 +513,32 @@ package body Urine_Records_Form is
              Order_By=> PadSizes.Brand);
       Load_Combo_Box(Q_lookup=> Q_ptype, 
                      list_store_name => "liststore_padtypes", fields => 4);
-    -- Set up: load up the list of Leakage
+      -- Set up: load up the list of Leakage
       Q_leak := SQL_Select
             (Fields  => Leakage.Value & Leakage.Leakage,
              From    => Leakage,
              Where   => Leakage.Value >= 0,
              Order_By=> Leakage.Leakage);
       Load_Combo_Box(Q_lookup=> Q_leak, list_store_name =>"liststore_leakage");
-    -- Set up: load up the list of Hold States
+      -- Set up: load up the list of Hold States
       Q_hold := SQL_Select
             (Fields  => HoldStates.ID & HoldStates.Description,
              From    => HoldStates,
              Where   => HoldStates.ID >= 0,
              Order_By=> HoldStates.Description);
       Load_Combo_Box(Q_lookup=> Q_hold, list_store_name =>"liststore_holds");
-    -- Set up: load up the list of Spasm intensities
+      -- Set up: load up the list of Spasm intensities
       Q_spasm := SQL_Select
             (Fields  => Spasms.Spasm & Spasms.Description,
              From    => Spasms,
              Where   => Spasms.Spasm >= 0,
              Order_By=> Spasms.Description);
       Load_Combo_Box(Q_lookup=> Q_spasm, list_store_name =>"liststore_spasms");
-   -- Set up: load up the data for the first record (if any)
+      -- Set up: load up the data for the first record (if any)
       Load_Urine_Record_Data(Builder => Builder, 
                              record_no => rec_no,
                              refresh => true);
-   -- Register the handlers
+      -- Register the handlers
       Register_Handler(Builder   => Builder,
                     Handler_Name => "file_new_ur_select_cb",
                     Handler      => Urine_Records_New_Selected_CB'Access);
@@ -630,6 +647,10 @@ package body Urine_Records_Form is
       Set_Can_Focus(combo_patient, true);
       Grab_Focus(combo_patient);
       Set_Can_Focus(combo_patient, can_focus);
+      -- default patient if there is only one
+      if number_of_patients = 1 then
+         Set_Active(combo_patient, Glib.Gint(0));  -- zero based index
+      end if;
       -- disable selectability (sensitive flag) of Store, Delete buttons
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
                                                "tb_ur_save")), False);
@@ -775,6 +796,19 @@ package body Urine_Records_Form is
    begin
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Urine_Records_Save_Selected_CB: Start");
+      -- Check we have a valid set of key fields
+      if Get_Combo_ID(Object,"combo_ur_patient_name","liststore_patients")<=0
+         or Get_Entry_Text(Object, "entry_cur_date")'Length = 0
+         or Get_Entry_Text(Object, "entry_cur_time")'Length = 0
+      then
+         Error_Log.Debug_Data(at_level    =>6, 
+                              with_details=>"Urine_Records_Save_Selected_CB: "&
+                                            "missing key field");
+         Error_Dialogue.Show_Error
+             (Builder=>Gtkada_Builder(Object),
+              message=>"One of either patient name, date or time is not set.");
+         return;
+      end if;
       -- Get the current record number
       current_record.record_number := Current(R_urine_records);
       -- Pad type is special because it can be null
@@ -856,6 +890,16 @@ package body Urine_Records_Form is
 
    procedure Urine_Records_Delete_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+     -- Check that the user is sure (if so, the Urine_Records_Delete_Record
+     -- is called).
+      use Check_For_Deletion;
+   begin
+      Show_Are_You_Sure(Builder    => Gtkada_Builder(Object),
+                        At_Handler => Urine_Records_Delete_Record'Access);
+   end Urine_Records_Delete_Selected_CB;
+   
+   procedure Urine_Records_Delete_Record 
+                (Object : access Gtkada_Builder_Record'Class) is
       use GNATCOLL.SQL.Exec;
       use Calendar_Extensions;
       use Gtkada.Builder;
@@ -897,8 +941,8 @@ package body Urine_Records_Form is
                              refresh   => true);
       -- done
       Error_Log.Debug_Data(at_level => 5, 
-                     with_details => "Urine_Records_Delete_Selected_CB: Done");
-   end Urine_Records_Delete_Selected_CB;
+                     with_details => "Urine_Records_Delete_Record: Done");
+   end Urine_Records_Delete_Record;
 
    procedure Urine_Records_Close_CB 
              (Object : access Gtkada_Builder_Record'Class) is

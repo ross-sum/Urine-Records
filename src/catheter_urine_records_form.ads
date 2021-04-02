@@ -74,6 +74,8 @@ private
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Catheter_Urine_Records_Delete_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class);
+   procedure Catheter_Urine_Records_Delete_Record 
+                (Object : access Gtkada_Builder_Record'Class);
    procedure Catheter_Urine_Records_Close_CB 
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Catheter_Urine_Records_Field_Changed_CB

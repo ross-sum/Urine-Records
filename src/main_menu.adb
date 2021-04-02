@@ -44,7 +44,7 @@ with Error_Log;
 with String_Conversions;
 with Ada.Characters.Conversions;
 with Urine_Record_Version;
-with Help_About, Help_Manual, Error_Dialogue;
+with Help_About, Help_Manual, Error_Dialogue, Check_For_Deletion;
 with Get_Date_Calendar, Urine_Colour_Selector;
 with Patient_Details, Urine_Records_Form, Catheter_Urine_Records_Form;
 with Report_Processor;
@@ -159,6 +159,7 @@ package body Main_Menu is
       Get_Date_Calendar.Initialise_Calendar(Builder);
       Urine_Colour_Selector.Initialise_Colour_Selector(Builder, DB_Descr,
                                                        path_to_temp);
+      Check_For_Deletion.Initialise(Builder);
       Patient_Details.Initialise_Patient_Details(Builder, DB_Descr);
       Urine_Records_Form.Initialise_Urine_Records(Builder, DB_Descr);
       Catheter_Urine_Records_Form.Initialise_Catheter_Urine_Records(Builder, 

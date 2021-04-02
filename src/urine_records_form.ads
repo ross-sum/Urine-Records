@@ -9,8 +9,20 @@
 --  Copyright (C) 2020  Hyper Quantum Pty Ltd.                       --
 --  Written by Ross Summerfield.                                     --
 --                                                                   --
---  This package displays the urine records data entry form, which 
---  contains .                                                     --
+--  This package displays the urine records data entry form,  which  --
+--  contains information around each urination event. That includes  --
+--  the volume, the pad weight (when a pad is changed), the kind of  --
+--  pad  change, whether any urges or spasms were  experienced  and  --
+--  how many, and whether a bowel motion was involved.  For spasms,  --
+--  the  intensity  as measured through the amount of  overflow  is  --
+--  recorded.   These  details  are recorded for the  time  of  the  --
+--  urination event.                                                 --
+--                                                                   --
+--  A big thank you to Kevin O'Kane for his You Tube videos on  how  --
+--  to use Glade.  Whilst his stuff is all in C, the information is  --
+--  directly  translatable in many cases and, if not, it points  to  --
+--  where  to look for how to do what you are  intending.   Kevin's  --
+--  presentations are very informative.                              --
 --                                                                   --
 --  Version History:                                                 --
 --  $Log$
@@ -69,6 +81,8 @@ private
    procedure Urine_Records_Save_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Urine_Records_Delete_Selected_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Urine_Records_Delete_Record 
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Urine_Records_Close_CB 
                 (Object : access Gtkada_Builder_Record'Class);

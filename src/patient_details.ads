@@ -61,29 +61,9 @@ private
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Patient_Details_Delete_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_Delete_Record 
+                (Object : access Gtkada_Builder_Record'Class);
    procedure Patient_Details_Close_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Patient_Details_KE_Select_changed_CB
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_First_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_Last_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_Add_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_Undo_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_Save_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Btn_Patient_KE_Remove_Clicked_CB 
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Patient_Details_KE_Date_edited_CB
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Patient_Details_KE_Date_clicked_CB
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Patient_Details_KE_Event_edited_CB
-                (Object : access Gtkada_Builder_Record'Class);
-   procedure Patient_Details_KE_Desc_edited_CB
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Patient_Details_Field_Changed_CB
                 (Object : access Gtkada_Builder_Record'Class);
@@ -104,6 +84,36 @@ private
    procedure Patient_Details_Last_Clicked_CB
                 (Object : access Gtkada_Builder_Record'Class);
    procedure Patient_Details_Date_Button_Pressed_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Select_changed_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_First_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Last_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Add_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Undo_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Save_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Remove_Clicked_CB 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Btn_Patient_KE_Remove_Record 
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Field_Changed_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Date_Changed_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Date_edited_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Date_clicked_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Event_edited_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Desc_edited_CB
+                (Object : access Gtkada_Builder_Record'Class);
+   procedure Patient_Details_KE_Date_Button_Pressed_CB
                 (Object : access Gtkada_Builder_Record'Class);
 
    function Number_of_PD_Records

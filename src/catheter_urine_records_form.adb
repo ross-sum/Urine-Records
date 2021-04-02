@@ -56,6 +56,7 @@ with GNATCOLL.SQL_Date_and_Time; use GNATCOLL.SQL_Date_and_Time;
 with GNATCOLL.SQL;               use GNATCOLL.SQL;
 with Database;                   use Database;
 with Get_Date_Calendar, Urine_Colour_Selector;
+with Check_For_Deletion;
 with Error_Dialogue;
 with dStrings;
 package body Catheter_Urine_Records_Form is
@@ -76,6 +77,7 @@ package body Catheter_Urine_Records_Form is
    --       end record;
 
    DB           : GNATCOLL.SQL.Exec.Database_Connection;
+   number_of_patients: natural := 0;
    -- Set up all the prepared queries
    CUR_select   : constant GNATCOLL.SQL.Exec.Prepared_Statement :=
       GNATCOLL.SQL.Exec.Prepare 
@@ -182,7 +184,7 @@ package body Catheter_Urine_Records_Form is
       the_date : Gtk.GEntry.gtk_entry;
       the_time : Gtk.GEntry.gtk_entry;
       cath_vol : Gtk.GEntry.gtk_entry;
-      colours  : Gtk.Combo_Box.gtk_combo_box;
+      colours  : Gtk.GEntry.gtk_entry;
       floaties : Gtk.Combo_Box.gtk_combo_box;
       leakage  : Gtk.Combo_Box.gtk_combo_box;
       Bld      : Gtkada_Builder := Gtkada_Builder(Builder);
@@ -195,12 +197,12 @@ package body Catheter_Urine_Records_Form is
          the_date:= gtk_entry(Get_Object(Builder,"entry_cur_date"));
          the_time:= gtk_entry(Get_Object(Builder,"entry_cur_time"));
          cath_vol:= gtk_entry(Get_Object(Builder,"entry_cur_volume"));
-         colours := gtk_combo_box(Get_Object(Builder,"combo_cur_colour"));
+         colours := gtk_entry(Get_Object(Builder,"ce_cur_colour"));
          floaties:= gtk_combo_box(Get_Object(Builder,"combo_cur_floaties"));
          leakage := gtk_combo_box(Get_Object(Builder,"combo_cur_leakage"));
       end;
-      Error_Log.Debug_Data(at_level => 6, 
-                           with_details => "Clear_Urine_Record_Fields: " &
+      Error_Log.Debug_Data(at_level    =>6, 
+                           with_details=>"Clear_Catheter_Urine_Record_Fields:"&
                                                  " initialised fields.");
       -- Clear all fields or set to default (with current date and time)
       Set_Text(patient,        "");
@@ -209,9 +211,11 @@ package body Catheter_Urine_Records_Form is
       Set_Text(the_time, To_String(from_wide =>
                To_String(from_time => Clock, with_format => "hh:nn:ss")));
       Set_Text(cath_vol,       "");
-      Set_To_ID(Bld, colours,  "liststore_cur_colour",   0);
+      Set_Text(colours,  "");
       Set_To_ID(Bld, leakage,  "liststore_cur_leakage",  0);
       Set_To_ID(Bld, floaties, "liststore_cur_floaties", 0);
+      Error_Log.Debug_Data(at_level => 5, 
+               with_details => "Clear_Catheter_Urine_Record_Fields: Done");
    end Clear_Catheter_Urine_Record_Fields;
 
    procedure Load_Catheter_Urine_Record_Data
@@ -404,18 +408,27 @@ package body Catheter_Urine_Records_Form is
       Q_colour   : SQL_Query;
       Q_leak     : SQL_Query;
       Q_float    : SQL_Query;
+      R_pd       : Forward_Cursor;
       rec_no     : record_movement(relative);
    begin
-   -- Set up: Open the relevant tables from the database
+      -- Set up: Open the relevant tables from the database
       DB:=GNATCOLL.SQL.Exec.Tasking.Get_Task_Connection(Description=>DB_Descr);
-   -- Set up: load up the list of patients (should be already set up by urine_records)
+      -- Set up: load up the list of patients (should be already set up by urine_records)
       Q_pd := SQL_Select
          (Fields  => PatientDetails.Identifier & PatientDetails.Patient,
           From    => PatientDetails,
           Where   => PatientDetails.Identifier >= 0,
           Order_By=> PatientDetails.Patient);
       -- Load_Combo_Box(Q_lookup=> Q_pd, list_store_name => "liststore_patients");
-   -- Set up: load up the list of Colour
+      -- Set up: count the number of patients
+      Q_pd := SQL_Select(Fields  => Apply (Func_Count, (PatientDetails.Identifier)),
+         From    => PatientDetails,
+         Where   => PatientDetails.Identifier >= 0);
+      R_pd.Fetch (Connection => DB, Query => Q_pd);
+      if Success(DB) and then Has_Row(R_pd) then
+         number_of_patients:= Integer_Value (R_pd, 0);
+      end if;
+      -- Set up: load up the list of Colour
       Q_colour := SQL_Select
             (Fields => ColourChart.Value & ColourChart.Colour,
              From    => ColourChart,
@@ -423,7 +436,7 @@ package body Catheter_Urine_Records_Form is
              Order_By=> ColourChart.Value);
       Load_Combo_Box(Q_lookup=> Q_colour, 
                      list_store_name => "liststore_cur_colour");
-    -- Set up: load up the list of Leakage
+      -- Set up: load up the list of Leakage
       Q_leak := SQL_Select
             (Fields  => CatheterLeakage.Value & CatheterLeakage.Leakage,
              From    => CatheterLeakage,
@@ -431,7 +444,7 @@ package body Catheter_Urine_Records_Form is
              Order_By=> CatheterLeakage.Leakage);
       Load_Combo_Box(Q_lookup=> Q_leak, 
                      list_store_name =>"liststore_cur_leakage");
-    -- Set up: load up the list of Floaties
+      -- Set up: load up the list of Floaties
       Q_float := SQL_Select
             (Fields  => Floaties.Value & Floaties.Floatie,
              From    => Floaties,
@@ -439,11 +452,11 @@ package body Catheter_Urine_Records_Form is
              Order_By=> Floaties.Floatie);
       Load_Combo_Box(Q_lookup=> Q_float, 
                      list_store_name =>"liststore_cur_floaties");
-   -- Set up: load up the data for the first record (if any)
+      -- Set up: load up the data for the first record (if any)
       Load_Catheter_Urine_Record_Data(Builder => Builder, 
                                       record_no => rec_no,
                                       refresh => true);
-   -- Register the handlers
+      -- Register the handlers
       Register_Handler(Builder   => Builder,
                     Handler_Name => "file_new_cur_select_cb",
                     Handler      => Catheter_Urine_Records_New_Selected_CB'Access);
@@ -528,7 +541,7 @@ package body Catheter_Urine_Records_Form is
 
    procedure Catheter_Urine_Records_New_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
-      use Gtkada.Builder, Gtk.Tool_Button, Gtk.Combo_Box;
+      use Gtkada.Builder, Gtk.Tool_Button, Gtk.Combo_Box, Gtk.List_Store;
       combo_patient : Gtk.Combo_Box.gtk_combo_box;
       can_focus     : boolean;
    begin
@@ -541,6 +554,10 @@ package body Catheter_Urine_Records_Form is
       Set_Can_Focus(combo_patient, true);
       Grab_Focus(combo_patient);
       Set_Can_Focus(combo_patient, can_focus);
+      -- default patient if there is only one
+      if number_of_patients = 1 then
+         Set_Active(combo_patient, Glib.Gint(0));
+      end if;
       -- disable selectability (sensitive flag) of Store, Delete buttons
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
                                                "tb_cur_save")), False);
@@ -605,29 +622,6 @@ package body Catheter_Urine_Records_Form is
          end if;
       end Get_Combo_ID;
       
-      -- function Get_Check_Box(Builder  : access Gtkada_Builder_record'Class;
-      --                        checkbox : Glib.UTF8_String) return boolean is
-         -- use Gtk.Check_Button;
-         -- chkbox : Gtk.Check_Button.gtk_check_button;
-      -- begin
-         -- chkbox := Gtk.Check_Button.gtk_check_button
-            --                     (Gtkada.Builder.Get_Object(Builder, checkbox));
-         -- return Get_Active(chkbox);
-      -- end Get_Check_Box;
-   --    
-      -- function Get_Text_View(Builder : access Gtkada_Builder_Record'Class;
-      --                        the_tv  : Glib.UTF8_String) return string is
-         -- use Gtk.Text_Buffer, Gtk.Text_Iter;
-         -- tb_box : Gtk.Text_Buffer.gtk_text_buffer;
-         -- start  : Gtk.Text_Iter.gtk_text_iter;
-         -- enditr : Gtk.Text_Iter.gtk_text_iter;
-      -- begin
-         -- tb_box := gtk_text_buffer(Get_Object(Builder, the_tv));
-         -- Get_Start_Iter(tb_box, start);
-         -- Get_End_Iter(tb_box, enditr);
-         -- return Get_Text(tb_box, start, enditr);
-      -- end Get_Text_View;
-      
       function Get_Entry_Text(Builder : access Gtkada_Builder_Record'Class;
                             the_entry : Glib.UTF8_String) return string is
          use Gtk.GEntry;
@@ -683,6 +677,16 @@ package body Catheter_Urine_Records_Form is
    begin  -- Catheter_Urine_Records_Save_Selected_CB
       Error_Log.Debug_Data(at_level => 5, 
              with_details => "Catheter_Urine_Records_Save_Selected_CB: Start");
+      -- Check we have a valid set of key fields
+      if Get_Combo_ID(Object,"combo_cur_patient_name","liststore_patients")<= 0
+         or Get_Entry_Text(Object, "entry_cur_date")'Length = 0
+         or Get_Entry_Text(Object, "entry_cur_time")'Length = 0
+      then
+         Error_Dialogue.Show_Error
+             (Builder=>Gtkada_Builder(Object),
+              message=>"One of either patient name, date or time is not set.");
+         return;
+      end if;
       -- Get the current record number
       current_record.record_number := Current(R_urine_records);
       -- Get all the field values and load into the parameter list
@@ -753,6 +757,16 @@ package body Catheter_Urine_Records_Form is
 
    procedure Catheter_Urine_Records_Delete_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+     -- Check that the user is sure (if so, the 
+     -- Catheter_Urine_Records_Delete_Record is called).
+      use Check_For_Deletion;
+   begin
+      Show_Are_You_Sure(Builder=> Gtkada_Builder(Object),
+                    At_Handler => Catheter_Urine_Records_Delete_Record'Access);
+   end Catheter_Urine_Records_Delete_Selected_CB;
+   
+   procedure Catheter_Urine_Records_Delete_Record 
+                (Object : access Gtkada_Builder_Record'Class) is
       use GNATCOLL.SQL.Exec;
       use Calendar_Extensions;
       use Gtkada.Builder;
@@ -795,7 +809,7 @@ package body Catheter_Urine_Records_Form is
       -- done
       Error_Log.Debug_Data(at_level => 5, 
             with_details => "Catheter_Urine_Records_Delete_Selected_CB: Done");
-   end Catheter_Urine_Records_Delete_Selected_CB;
+   end Catheter_Urine_Records_Delete_Record;
 
    procedure Catheter_Urine_Records_Close_CB 
              (Object : access Gtkada_Builder_Record'Class) is

@@ -70,6 +70,8 @@ package GNATCOLL.SQL_Date_and_Time is
 
    function tDate_Value (Self  : GNATCOLL.SQL.Exec.Direct_Cursor; 
                          Field : GNATCOLL.SQL.Exec.Field_Index) return tDate;
+   function tDate_Value (Self  : GNATCOLL.SQL.Exec.Forward_Cursor; 
+                         Field : GNATCOLL.SQL.Exec.Field_Index) return tDate;
    
    ----------
    -- Time --

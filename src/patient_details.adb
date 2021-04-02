@@ -33,14 +33,16 @@
 -- with Calendar_Extensions;
 with Gtk.Widget, Gtk.Grid;
 with Gtk.Tool_Button;
-with Gtk.GEntry, Gtk.Check_Button;
+with Gtk.GEntry, Gtk.Check_Button, Gtk.Text_Buffer, Gtk.Text_Iter;
 with Gtk.Label;
 with Glib, Glib.Values;
 with Gtk.List_Store, Gtk.Tree_Model, Gtk.Tree_View, Gtk.Tree_Selection;
+with Gtk.Tree_Row_Reference, Gtk.Tree_Selection;
 with Error_Log;
 with String_Conversions;
 with Urine_Record_Version;
 with Get_Date_Calendar;
+with Check_For_Deletion;
 with GNATCOLL.SQL.Exec.Tasking;
 with GNATCOLL.SQL_Date_and_Time; use GNATCOLL.SQL_Date_and_Time;
 with GNATCOLL.SQL;               use GNATCOLL.SQL;
@@ -96,8 +98,38 @@ package body Patient_Details is
                        Where => (PatientDetails.Identifier=Integer_Param(1))),
             On_Server => True,
             Use_Cache => False);
+   KE_insert       : constant GNATCOLL.SQL.Exec.Prepared_Statement :=
+      GNATCOLL.SQL.Exec.Prepare 
+           (SQL_Insert(Values  =>(KeyEvents.Patient   = Integer_Param(1)) &
+                                 (KeyEvents.EventDate = tDate_Param(2)) &
+                                 (KeyEvents.Event     = Text_Param(3)) &
+                                 (KeyEvents.Details   = Text_Param(4))),
+            On_Server => True,
+            Use_Cache => False);
+   KE_update       : constant GNATCOLL.SQL.Exec.Prepared_Statement :=
+      GNATCOLL.SQL.Exec.Prepare 
+           (SQL_Update(Table => KeyEvents,
+                       Set   => (KeyEvents.Patient      = Integer_Param(1))&
+                                (KeyEvents.EventDate    = tDate_Param(2)) &
+                                (KeyEvents.Event        = Text_Param(3)) &
+                                (KeyEvents.Details      = Text_Param(4)),
+                       Where => (KeyEvents.Patient   = Integer_Param(5)) AND 
+                                (KeyEvents.EventDate = tDate_Param(6))),
+            On_Server => True,
+            Use_Cache => False);
+   KE_delete       : constant GNATCOLL.SQL.Exec.Prepared_Statement :=
+      GNATCOLL.SQL.Exec.Prepare 
+           (SQL_Delete(From  => KeyEvents,
+                       Where => (KeyEvents.Patient=Integer_Param(1)) AND 
+                                (KeyEvents.EventDate=tDate_Param(2))),
+            On_Server => True,
+            Use_Cache => False);
    R_patient_details : GNATCOLL.SQL.Exec.Direct_Cursor;
-
+   last_row : Gtk.Tree_Row_Reference.Gtk_Tree_Row_Reference := 
+                       Gtk.Tree_Row_Reference.Null_Gtk_Tree_Row_Reference;
+   last_ke_date  : dStrings.text;
+   last_ke_event : dStrings.text;
+   last_ke_desc  : dStrings.text;
 
    procedure Initialise_Patient_Details(Builder : in out Gtkada_Builder;
                           DB_Descr : GNATCOLL.SQL.Exec.Database_Description) is
@@ -131,39 +163,6 @@ package body Patient_Details is
                        Handler_Name => "file_close_pd_select_cb",
                        Handler      => Patient_Details_Close_CB'Access);
       Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_first_clicked_cb",
-                       Handler      => Btn_Patient_KE_First_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_last_clicked_cb",
-                       Handler      => Btn_Patient_KE_Last_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_add_clicked_cb",
-                       Handler      => Btn_Patient_KE_Add_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_undo_clicked_cb",
-                       Handler      => Btn_Patient_KE_Undo_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_save_clicked_cb",
-                       Handler      => Btn_Patient_KE_Save_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "btn_patient_ke_remove_clicked_cb",
-                       Handler      => Btn_Patient_KE_Remove_Clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "edit_ke_date_edited_cb",
-                       Handler      => Patient_Details_KE_Date_edited_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "patient_ke_date_clicked_cb",
-                       Handler      => Patient_Details_KE_Date_clicked_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "edit_ke_event_edited_cb",
-                       Handler      => Patient_Details_KE_Event_edited_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "edit_ke_description_edited_cb",
-                       Handler      => Patient_Details_KE_Desc_edited_CB'Access);
-      Register_Handler(Builder      => Builder,
-                       Handler_Name => "pd_ke_select_changed_cb",
-                       Handler      => Patient_Details_KE_Select_changed_CB'Access);
-      Register_Handler(Builder      => Builder,
                        Handler_Name => "pd_field_changed_cb",
                        Handler      => Patient_Details_Field_Changed_CB'Access);
       Register_Handler(Builder      => Builder,
@@ -193,6 +192,49 @@ package body Patient_Details is
       Register_Handler(Builder      => Builder,
                        Handler_Name => "entry_pd_date_icon_press_cb",
                        Handler    => Patient_Details_Date_Button_Pressed_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_first_clicked_cb",
+                       Handler      => Btn_Patient_KE_First_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_last_clicked_cb",
+                       Handler      => Btn_Patient_KE_Last_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_add_clicked_cb",
+                       Handler      => Btn_Patient_KE_Add_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_undo_clicked_cb",
+                       Handler      => Btn_Patient_KE_Undo_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_save_clicked_cb",
+                       Handler      => Btn_Patient_KE_Save_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "btn_patient_ke_remove_clicked_cb",
+                       Handler      => Btn_Patient_KE_Remove_Clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "ke_field_changed_cb",
+                       Handler    => Patient_Details_KE_Field_Changed_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "ke_date_changed_cb",
+                       Handler      => Patient_Details_KE_Date_Changed_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "edit_ke_date_edited_cb",
+                       Handler      => Patient_Details_KE_Date_edited_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "patient_ke_date_clicked_cb",
+                       Handler      => Patient_Details_KE_Date_clicked_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "edit_ke_event_edited_cb",
+                       Handler      => Patient_Details_KE_Event_edited_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "edit_ke_description_edited_cb",
+                       Handler      => Patient_Details_KE_Desc_edited_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "pd_ke_select_changed_cb",
+                       Handler      => Patient_Details_KE_Select_changed_CB'Access);
+      Register_Handler(Builder      => Builder,
+                       Handler_Name => "entry_ke_date_icon_press_cb",
+                       Handler    => Patient_Details_KE_Date_Button_Pressed_CB'Access);
+      
       -- Set up the tab order
       declare
          ur_grid      : Gtk.Grid.Gtk_Grid := 
@@ -392,6 +434,16 @@ package body Patient_Details is
 
    procedure Patient_Details_Delete_Selected_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+     -- Check that the user is sure (if so, the Patient_Details_Delete_Record
+     -- is called).
+      use Check_For_Deletion;
+   begin
+      Show_Are_You_Sure(Builder    => Gtkada_Builder(Object),
+                        At_Handler => Patient_Details_Delete_Record'Access);
+   end Patient_Details_Delete_Selected_CB;
+                
+   procedure Patient_Details_Delete_Record 
+                (Object : access Gtkada_Builder_Record'Class) is
       use GNATCOLL.SQL.Exec;
       use Calendar_Extensions;
       use Gtkada.Builder;
@@ -408,7 +460,7 @@ package body Patient_Details is
       begin
          Execute (Connection => pDB, Stmt => PD_delete, Params => P_pd);
       end;
-      --  Commit if both insertion succeeded, rollback otherwise
+      --  Commit if delete succeeded, rollback otherwise
       Commit_Or_Rollback (pDB);
       if Success(pDB) then
       -- Go to current record - 1 if not first (otherwise go to 1)
@@ -426,8 +478,8 @@ package body Patient_Details is
                              refresh   => true);
       -- done
       Error_Log.Debug_Data(at_level => 5, 
-                   with_details => "Patient_Details_Delete_Selected_CB: Done");
-   end Patient_Details_Delete_Selected_CB;
+                   with_details => "Patient_Details_Delete_Record: Done");
+   end Patient_Details_Delete_Record;
 
    procedure Patient_Details_Close_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
@@ -441,113 +493,511 @@ package body Patient_Details is
 
    procedure Patient_Details_KE_Select_changed_CB
                 (Object : access Gtkada_Builder_Record'Class) is
+      -- Selected Row of record has changed - update fields
       use Gtkada.Builder, Gtk.Tree_View, Gtk.Tree_Selection, Gtk.List_Store;
-      use dStrings;
-      
-      -- function Get_Entry_Date(Builder : access Gtkada_Builder_Record'Class;
-      --                         the_entry : Glib.UTF8_String) return tDate is
-         -- use Calendar_Extensions, String_Conversions, dStrings;
-         -- the_date : text;
-      -- begin
-         -- the_date := Value(from=>Get_Entry_Text(Builder, the_entry));
-         -- if Length(the_date) <= 2 then -- just day specified, assume this month
-            -- the_date := the_date & "/" & 
-               --           To_String(from_time=> Clock, with_format=> "mm/yyyy");
-         -- elsif Length(the_date) <= 5 then -- no year specified, assume current
-            -- the_date := the_date & "/" & 
-               --           To_String(from_time=> Clock, with_format=> "yyyy");
-         -- end if;
-         -- return tDate(To_Time(from_string =>  Value(the_date),
-            --                   with_format => "dd/mm/yyyy"));
-      -- end Get_Entry_Date;
-   
+      use Gtk.Tool_Button, Gtk.Tree_Model;
+      use Gtk.GEntry, Gtk.Text_Buffer;
       model    : Gtk.Tree_Model.Gtk_Tree_Model;
       iter     : Gtk.Tree_Model.gtk_tree_iter;
       store    : Gtk.List_Store.gtk_list_store;
       ke_select: Gtk.Tree_Selection.gtk_tree_selection;
       col_data : Glib.Values.GValue;
-      the_record: text := Value("Patient_Details_KE_Select_changed_CB: ");
+      ke_date  : Gtk.GEntry.gtk_entry;
+      ke_event : Gtk.Text_Buffer.gtk_text_buffer;
+      ke_desc  : Gtk.Text_Buffer.gtk_text_buffer;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                 with_details => "Patient_Details_KE_Select_changed_CB: Start");
-      -- model    := Get_Model(Gtk_Tree_View_Record( 
-         --                    (Get_Object(Gtkada_Builder(Object),
-         --                                 "key_events_tree_view").all))'Access);
+      -- Get the hook into the currently selected record
       ke_select:= Get_Selection(Gtk_Tree_View_Record( 
-                                (Get_Object(Gtkada_Builder(Object),
-                                         "key_events_tree_view").all))'Access);
-      store := gtk_list_store(
-                        Get_Object(Gtkada_Builder(Object),"key_events_table"));
+                      (Get_Object(Object,"key_events_tree_view").all))'Access);
+      store := gtk_list_store(Get_Object(Object,"key_events_table"));
       Get_Selected(ke_select, model, iter);
-      Get_Value(store, iter, 0, col_data); the_record := the_record & Value("Date:"& Glib.Values.Get_String(col_data));
-      Get_Value(store, iter, 1, col_data); the_record := the_record & Value(" "& Glib.Values.Get_String(col_data));
-      Get_Value(store, iter, 2, col_data); the_record := the_record & Value(": "& Glib.Values.Get_String(col_data));
-      Error_Log.Debug_Data(at_level => 6, with_details => Value(of_string => the_record));
-      null;
+      -- hook in the Zoom tab fields
+      ke_date := gtk_entry(Get_Object(Object,"entry_ke_date"));
+      ke_event:= gtk_text_buffer(Get_Object(Object,"tb_pd_ke_event"));
+      ke_desc := gtk_text_buffer(Get_Object(Object,"tb_pd_ke_desc"));
+      -- load data into the Zoom tab fields
+      Get_Value(store, iter, 0, col_data);
+      Set_Text(ke_date, Glib.Values.Get_String(col_data));
+      Get_Value(store, iter, 1, col_data); 
+      Set_Text(ke_event, Glib.Values.Get_String(col_data));
+      Get_Value(store, iter, 2, col_data); 
+      Set_Text(ke_desc, Glib.Values.Get_String(col_data));
+      -- make Delete, New selectable (set sensitive flag)
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_remove")), True);
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_add")), True);
+      -- make Undo, Save not selectable (reset sensitive flag)
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_undo")), False);
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_save")), False);
+      -- make First, Last Record selectable or not as appropriate
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_first")), 
+           (iter /= Get_Iter_First(store)));
+      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
+          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_last")), 
+           (iter /= Get_Iter_First(store)));
    end Patient_Details_KE_Select_changed_CB;
 
    procedure Btn_Patient_KE_First_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+      use Gtkada.Builder,Gtk.List_Store;
+      use Gtk.Tree_View, Gtk.Tree_Selection;
+      store    : Gtk.List_Store.gtk_list_store;
+      iter     : Gtk.Tree_Model.gtk_tree_iter;
+      tree_view: Gtk.Tree_View.gtk_tree_view;
+      selected : Gtk.Tree_Selection.gtk_tree_selection;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                      with_details => "Btn_Patient_KE_First_Clicked_CB: Start");
+      -- set the iter to point to the first row
+      store     := gtk_list_store(Get_Object(Object, "key_events_table"));
+      iter      := Get_Iter_First(store);
+      tree_view := gtk_tree_view(Get_Object(Object, "key_events_tree_view"));
+      selected  := Get_Selection(tree_view);
+      -- select the row pointed to by iter and scroll to it
+      Select_Iter(selected, iter);  -- set the tree view selection to iter
       null;
    end Btn_Patient_KE_First_Clicked_CB;
    
    procedure Btn_Patient_KE_Last_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+      use Gtkada.Builder, Gtk.List_Store, Gtk.Tree_Row_Reference;
+      use Gtk.Tree_View, Gtk.Tree_Selection;
+      store    : Gtk.List_Store.gtk_list_store;
+      iter     : Gtk.Tree_Model.gtk_tree_iter;
+      tree_view: Gtk.Tree_View.gtk_tree_view;
+      selected : Gtk.Tree_Selection.gtk_tree_selection;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                       with_details => "Btn_Patient_KE_Last_Clicked_CB: Start");
+      -- set the iter to point to the last row
+      store     := gtk_list_store(Get_Object(Object, "key_events_table"));
+      iter      := Get_Iter(store, Get_Path(last_row));
+      tree_view := gtk_tree_view(Get_Object(Object, "key_events_tree_view"));
+      selected  := Get_Selection(tree_view);
+      -- select the row pointed to by iter and scroll to it
+      Select_Iter(selected, iter);  -- set the tree view selection to iter
       null;
    end Btn_Patient_KE_Last_Clicked_CB;
 
    procedure Btn_Patient_KE_Add_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+      -- Add a new Key Event row
+      use Gtkada.Builder, Gtk.Tool_Button, Gtk.Tree_View, Gtk.Tree_Model;
+      use Gtk.Tree_Selection, Gtk.List_Store;
+      model    : Gtk.Tree_Model.Gtk_Tree_Model;
+      store    : Gtk.List_Store.gtk_list_store;
+      ke_select: Gtk.Tree_Selection.gtk_tree_selection;
+      current  : Gtk.Tree_Model.gtk_tree_iter;
+      new_iter : Gtk.Tree_Model.gtk_tree_iter;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Add_Clicked_CB: Start");
-      null;
+      store := gtk_list_store(Get_Object(Object, "key_events_table"));
+      ke_select:= Get_Selection(Gtk_Tree_View_Record((Get_Object(Object,
+                                         "key_events_tree_view").all))'Access);
+      Get_Selected(ke_select, model, current);
+      if current = Null_Iter then  -- number of rows = 0
+         Insert(store, new_iter, 0);
+      else
+         Insert_Before(store, new_iter, current);
+         Previous(store, current);
+         Select_Iter(ke_select, current);  -- select the added blank row
+      end if;
+      -- new_iter now points to the inserted row
+      -- disable selectability (sensitive flag) of Store, Delete buttons
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_save")), False);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                              "btn_patient_ke_remove")),False);
+      -- make Undo, Clear selectable (set sensitive flag)
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_undo")), True);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "tb_pd_clear")), True);
    end Btn_Patient_KE_Add_Clicked_CB;
 
    procedure Btn_Patient_KE_Undo_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+      use Gtkada.Builder, Gtk.Tool_Button, Gtk.GEntry, dStrings;
+      use Gtk.Tree_View, Gtk.Tree_Model, Gtk.Tree_Selection, Gtk.List_Store;
+      use GNATCOLL.SQL.Exec;
+      current_record : record_movement(absolute);
+      model    : Gtk.Tree_Model.Gtk_Tree_Model;
+      store    : Gtk.List_Store.gtk_list_store;
+      ke_select: Gtk.Tree_Selection.gtk_tree_selection;
+      iter     : Gtk.Tree_Model.gtk_tree_iter;
+      the_data : Glib.Values.GValue;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Undo_Clicked_CB: Start");
-      null;
+      -- Get previous/current record number
+      current_record.record_number := Current(R_patient_details);
+      -- Get a pointer to the row in the tree view
+      store := gtk_list_store(Get_Object(GtkAda_Builder(Object),
+                                         "key_events_table"));
+      ke_select:= Get_Selection(Gtk_Tree_View_Record( 
+                                (Get_Object(Gtkada_Builder(Object),
+                                         "key_events_tree_view").all))'Access);
+      -- check if Delete is greyed out (not sensitive).  If so then New
+      if Get_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_remove")))
+      then  -- Not a new entry - reset back to original
+         -- restore current row data
+         Get_Selected(ke_select, model, iter);
+         Glib.Values.Init_Set_String (the_data, Value(last_ke_date));
+         Set_Value(store, iter, 0, the_data);
+         Glib.Values.Init_Set_String (the_data, Value(last_ke_event));
+         Set_Value(store, iter, 1, the_data);
+         Glib.Values.Init_Set_String (the_data, Value(last_ke_desc));
+         Set_Value(store, iter, 2, the_data);
+      else  -- New record - undo the new and go back to last record
+         -- delete new row
+         -- Get the pointer current record key field
+         Get_Selected(ke_select, model, iter);
+         -- and delete it.
+         Remove(store, iter);
+      end if;
+      -- No need to touch the database - it's unchanged.
+      -- done
+      Error_Log.Debug_Data(at_level => 5, 
+                       with_details => "Urine_Records_Undo_Selected_CB: Done");
    end Btn_Patient_KE_Undo_Clicked_CB;
 
    procedure Btn_Patient_KE_Save_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
-   begin
+      use Gtkada.Builder, Gtk.Tool_Button;
+      use GNATCOLL.SQL.Exec;
+      
+      function Get_Entry_Text(Builder : access Gtkada_Builder_Record'Class;
+                            the_entry : Glib.UTF8_String) return string is
+         use Gtk.GEntry;
+         entry_box : Gtk.GEntry.gtk_entry;
+      begin
+         entry_box := gtk_entry(Get_Object(Builder, the_entry));
+         return Get_Text(gtk_entry(entry_box));
+      end Get_Entry_Text;
+      
+      function Get_Text_View(Builder : access Gtkada_Builder_Record'Class;
+                             the_tv  : Glib.UTF8_String) return string is
+         use Gtk.Text_Buffer, Gtk.Text_Iter;
+         tb_box : Gtk.Text_Buffer.gtk_text_buffer;
+         start  : Gtk.Text_Iter.gtk_text_iter;
+         enditr : Gtk.Text_Iter.gtk_text_iter;
+      begin
+         tb_box := gtk_text_buffer(Get_Object(Builder, the_tv));
+         Get_Start_Iter(tb_box, start);
+         Get_End_Iter(tb_box, enditr);
+         return Get_Text(tb_box, start, enditr);
+      end Get_Text_View;
+      
+      function Get_Entry_Number(Builder : access Gtkada_Builder_Record'Class;
+                            the_entry : Glib.UTF8_String) return natural is
+         use dStrings;
+         the_number : text;
+      begin
+         the_number := Value(from=>Get_Entry_Text(Builder, the_entry));
+         return Get_Integer_From_String(the_number);
+      end Get_Entry_Number;
+      
+      function Get_Entry_Date(Builder : access Gtkada_Builder_Record'Class;
+                              the_entry : Glib.UTF8_String) return tDate is
+         use Calendar_Extensions, String_Conversions, dStrings;
+         the_date : text;
+      begin
+         the_date := Value(from=>Get_Entry_Text(Builder, the_entry));
+         if Length(the_date) <= 2 then -- just day specified, assume this month
+            the_date := the_date & "/" & 
+                         To_String(from_time=> Clock, with_format=> "mm/yyyy");
+         elsif Length(the_date) <= 5 then -- no year specified, assume current
+            the_date := the_date & "/" & 
+                         To_String(from_time=> Clock, with_format=> "yyyy");
+         end if;
+         return tDate(To_Time(from_string =>  Value(the_date),
+                              with_format => "dd/mm/yyyy"));
+      end Get_Entry_Date;
+      
+      current_record : record_movement(absolute);
+      P_pd     : SQL_Parameters (1 .. 4);
+   begin  -- Btn_Patient_KE_Save_Clicked_CB
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Save_Clicked_CB: Start");
+      -- Get the current record number
+      current_record.record_number := Current(R_patient_details);
+      -- Get all the field values and load into the parameter list
+      P_pd := (1 => +Get_Entry_Number(Object, "entry_patient_identifer"),-- Patient
+               2 => +Get_Entry_Date(Object, "entry_ke_date"),      -- EventDate
+               3 => +Get_Text_View(Object, "tb_pd_ke_event"),      -- Event
+               4 => +Get_Text_View(Object, "tb_pd_ke_desc"));      -- Details
+      -- check if Delete is greyed out (not sensitive).  If so then New
+      if Get_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                                  "btn_patient_ke_remove")))
+      then  -- Not a new entry - Update existing record
+         -- build out the parameter list to include the current record's
+         -- key fields
+         Error_Log.Debug_Data(at_level => 6, 
+                       with_details => "Btn_Patient_KE_Save_Clicked_CB: Update");
+         declare
+            use Calendar_Extensions, dStrings;
+            p_pd_cond : SQL_Parameters (1 .. 2) :=
+                           (1=>+Integer_Value(R_patient_details,0),
+                            2=>+tDate(To_Time(from_string=>Value(last_ke_date),
+                                              with_format=>"dd/mm/yyyy")));
+            p_pd_update : SQL_Parameters (1 .. 6) := (P_pd & p_pd_cond);
+         begin
+            -- execute the update query
+            Execute (Connection => pDB, Stmt => KE_update, Params => P_pd_update);
+            Commit_Or_Rollback (pDB);
+         end;
+      else  -- New record - insert record
+         -- First, insert the record
+         Error_Log.Debug_Data(at_level => 6, 
+                       with_details => "Btn_Patient_KE_Save_Clicked_CB: New");
+         Execute (Connection => pDB, Stmt => KE_insert, Params => P_pd);
+         Commit_Or_Rollback (pDB);
+         if Success(pDB) then -- committed, not rolled back
+            -- update the record count and go to the current record + 1
+            null;--current_record.record_number := current_record.record_number + 1;
+         end if;
+      end if;
+      Error_Log.Debug_Data(at_level => 6, 
+                       with_details => "Btn_Patient_KE_Save_Clicked_CB: Saved");
+      -- Finally, for insert or update, refresh the local list of records
+      if Success(pDB) then -- i.e. committed, not rolled back
+         Load_Patient_Details_Data(Builder   => Gtkada_Builder(Object),
+                                   record_no => current_record,
+                                   refresh   => true);
+      else -- some trouble saving
+         Error_Dialogue.Show_Error
+             (Builder => Gtkada_Builder(Object),
+              message => "A database issue encountered saving the record.");
+      end if;
+      -- disable selectability (sensitive flag) of Store, Undo buttons
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                               "btn_patient_ke_save")), False);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                               "btn_patient_ke_undo")), False);
+      -- make Delete, Clear selectable (set sensitive flag)
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                               "btn_patient_ke_remove")),True);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                               "tb_pd_clear")), True);
+      -- done
       null;
    end Btn_Patient_KE_Save_Clicked_CB;
 
    procedure Btn_Patient_KE_Remove_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
+      -- Check that the user is sure (if so, the Btn_Patient_KE_Remove_Record
+      -- is called).
+      use Check_For_Deletion;
+   begin
+      Show_Are_You_Sure(Builder    => Gtkada_Builder(Object),
+                        At_Handler => Btn_Patient_KE_Remove_Record'Access);
+   end Btn_Patient_KE_Remove_Clicked_CB;
+   
+   procedure Btn_Patient_KE_Remove_Record 
+                (Object : access Gtkada_Builder_Record'Class) is
+      -- Delete the Key Events record that is the current row
+      use Gtkada.Builder, Gtk.Tree_View, Gtk.Tree_Model;
+      use Gtk.Tree_Selection, Gtk.List_Store;
+      use String_Conversions, Calendar_Extensions;
+      use GNATCOLL.SQL.Exec;
+      model    : Gtk.Tree_Model.Gtk_Tree_Model;
+      store    : Gtk.List_Store.gtk_list_store;
+      ke_select: Gtk.Tree_Selection.gtk_tree_selection;
+      current  : Gtk.Tree_Model.gtk_tree_iter;
+      ke_date  : tDate;
+      patient  : natural := Integer_Value(R_patient_details, 0);
+      col_data : Glib.Values.GValue;
    begin
       Error_Log.Debug_Data(at_level => 5, 
-                    with_details => "Btn_Patient_KE_Remove_Clicked_CB: Start");
-      null;
-   end Btn_Patient_KE_Remove_Clicked_CB;
+                    with_details => "Btn_Patient_KE_Remove_Record: Start");
+      -- Get the current record key field
+      store := gtk_list_store(Get_Object(GtkAda_Builder(Object),
+                                         "key_events_table"));
+      ke_select:= Get_Selection(Gtk_Tree_View_Record( 
+                                (Get_Object(Gtkada_Builder(Object),
+                                         "key_events_tree_view").all))'Access);
+      Get_Selected(ke_select, model, current);
+      Get_Value(store, current, 0, col_data);
+      ke_date := tDate(To_Time(from_string =>  
+                              To_Wide_String(Glib.Values.Get_String(col_data)),
+                               with_format => "dd/mm/yyyy"));
+      -- Delete from the database
+      declare
+         -- use String_Conversions;
+         P_ke : SQL_Parameters (1 .. 2) := (1 => +patient,
+                                            2 => +ke_date);
+      begin
+         Execute (Connection => pDB, Stmt => KE_delete, Params => P_ke);
+      end;
+      --  Commit if delete succeeded, rollback otherwise
+      Commit_Or_Rollback (pDB);
+      if Success(pDB) then
+         -- Delete from the list store
+         Remove(store, current);
+         Error_Log.Debug_Data(at_level => 6, 
+                     with_details => "Btn_Patient_KE_Remove_Record: Deleted");
+      else -- some trouble deleting
+         Error_Dialogue.Show_Error
+             (Builder => Gtkada_Builder(Object),
+              message => "A database issue encountered deleting the record.");
+      end if;
+   end Btn_Patient_KE_Remove_Record;
+
+   procedure Patient_Details_KE_Field_Changed_CB
+             (Object : access Gtkada_Builder_Record'Class) is
+      use Gtkada.Builder, Gtk.Tool_Button, dStrings;
+      use Gtk.Tree_View, Gtk.Tree_Selection, Gtk.List_Store, Glib.Values;
+      
+      function Get_Text_View(Builder : access Gtkada_Builder_Record'Class;
+                             the_tv  : Glib.UTF8_String) return string is
+         use Gtk.Text_Buffer, Gtk.Text_Iter;
+         tb_box : Gtk.Text_Buffer.gtk_text_buffer;
+         start  : Gtk.Text_Iter.gtk_text_iter;
+         enditr : Gtk.Text_Iter.gtk_text_iter;
+      begin
+         tb_box := gtk_text_buffer(Get_Object(Builder, the_tv));
+         Get_Start_Iter(tb_box, start);
+         Get_End_Iter(tb_box, enditr);
+         return Get_Text(tb_box, start, enditr);
+      end Get_Text_View;
+   
+      tree_view : Gtk.Tree_View.gtk_tree_view;
+      model     : Gtk.Tree_Model.gtk_tree_model;
+      store     : Gtk.List_Store.gtk_list_store;
+      selected  : Gtk.Tree_Selection.gtk_tree_selection;
+      iter      : Gtk.Tree_Model.gtk_tree_iter;
+      the_data  : Glib.Values.GValue;
+   begin
+      Error_Log.Debug_Data(at_level => 5, 
+            with_details => "Patient_Details_KE_Field_Changed_CB: Start");
+      store := gtk_list_store(Get_Object(Object,"key_events_table"));
+      tree_view := gtk_tree_view(Get_Object(Object,"key_events_tree_view"));
+      selected  := Get_Selection(tree_view);
+      Get_Selected(selected, model, iter);
+      if not Get_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                                      "btn_patient_ke_save")))
+         then
+         Get_Value(store, iter, 0, the_data);
+         last_ke_date := Value(Glib.Values.Get_String(the_data));
+         Get_Value(store, iter, 1, the_data);
+         last_ke_event:= Value(Glib.Values.Get_String(the_data));
+         Get_Value(store, iter, 2, the_data);
+         last_ke_desc := Value(Glib.Values.Get_String(the_data));
+      end if;
+      -- ensure fields in the table view match the Zoom tab
+      Glib.Values.Init_Set_String (the_data,
+                                   Get_Text_View(Object, "tb_pd_ke_event"));
+      Set_Value(store, iter, 1, the_data);
+      Glib.Values.Init_Set_String (the_data,
+                                   Get_Text_View(Object, "tb_pd_ke_desc"));
+      Set_Value(store, iter, 2, the_data);
+      -- enable selectability (sensitive flag) of Store, Undo buttons
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_save")), True);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object), 
+                                               "btn_patient_ke_undo")), True);
+   end Patient_Details_KE_Field_Changed_CB;
+   
+   procedure Patient_Details_KE_Date_Changed_CB
+             (Object : access Gtkada_Builder_Record'Class) is
+     -- Allowed characters are '0'..'9', '/'
+      use Gtkada.Builder, Gtk.Tool_Button, Gtk.GEntry, dStrings;
+      use Gtk.Tree_View, Gtk.Tree_Selection, Gtk.List_Store, Glib.Values;
+      keyed_data: string  := Get_Text(Gtk_Entry_Record
+                              (Get_Object(Object,"entry_ke_date").all)'Access);
+      str_len   : natural := keyed_data'Length;
+      last_char : character;
+      tree_view : Gtk.Tree_View.gtk_tree_view;
+      model     : Gtk.Tree_Model.gtk_tree_model;
+      store     : Gtk.List_Store.gtk_list_store;
+      selected  : Gtk.Tree_Selection.gtk_tree_selection;
+      iter      : Gtk.Tree_Model.gtk_tree_iter;
+      the_data  : Glib.Values.GValue;
+   begin
+      Error_Log.Debug_Data(at_level => 5, 
+            with_details => "Patient_Details_KE_Date_Changed_CB: Start");
+      if str_len > 0 then
+         last_char := keyed_data(keyed_data'Last);
+         case last_char is
+            when '0'..'9' => null;  -- valid data
+            when '/'      => null;  -- valid data
+            when others =>
+               str_len := str_len - 1;
+         end case;
+            -- Set the Date field on the Zoom tab
+         Set_Text(Gtk_Entry_Record(Get_Object(Object, 
+                                              "entry_ke_date").all)'Access,
+                  keyed_data(keyed_data'First .. str_len));
+         -- And set the Date field on the List tab
+         store := gtk_list_store(Get_Object(Object,"key_events_table"));
+         tree_view := gtk_tree_view(Get_Object(Object,"key_events_tree_view"));
+         selected  := Get_Selection(tree_view);
+         Get_Selected(selected, model, iter);
+         if not Get_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                                       "btn_patient_ke_save")))
+         then
+            Get_Value(store, iter, 0, the_data);
+            last_ke_date := Value(Glib.Values.Get_String(the_data));
+            Get_Value(store, iter, 1, the_data);
+            last_ke_event:= Value(Glib.Values.Get_String(the_data));
+            Get_Value(store, iter, 2, the_data);
+            last_ke_desc := Value(Glib.Values.Get_String(the_data));
+         end if;
+         Glib.Values.Init_Set_String (the_data,
+                                      keyed_data(keyed_data'First .. str_len));
+         Set_Value(store, iter, 0, the_data);
+      end if;   
+      -- enable selectability (sensitive flag) of Store, Undo buttons
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_save")), True);
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object), 
+                                               "btn_patient_ke_undo")), True);
+   end Patient_Details_KE_Date_Changed_CB;
+
+   procedure Patient_Details_KE_Date_Button_Pressed_CB
+                (Object : access Gtkada_Builder_Record'Class) is
+      use Gtkada.Builder, Gtk.GEntry, Get_Date_Calendar;
+      date_entry : Gtk_GEntry := Gtk_GEntry(Get_Object(Object,
+                                                       "entry_ke_date"));
+   begin
+      Error_Log.Debug_Data(at_level => 5, 
+            with_details=> "Patient_Details_KE_Date_Button_Pressed_CB: Start");
+      -- Pop up the date calendar, act upon it
+      Get_Date_Calendar.Show_Calendar(Builder  => Gtkada_Builder(Object),
+                                      At_Field => date_entry);
+   end Patient_Details_KE_Date_Button_Pressed_CB;
 
    procedure Patient_Details_KE_Date_edited_CB
                 (Object : access Gtkada_Builder_Record'Class) is
-      model : Gtk.Tree_Model.Gtk_Tree_Model;
-      path  : Gtk.Tree_Model.Gtk_Tree_Path;
-      iter  : Gtk.Tree_Model.gtk_tree_iter;
+      use Gtkada.Builder, Gtk.Tree_View, Gtk.Tree_Model;
+      use Gtk.Tree_Selection, Gtk.List_Store;
+      use Gtk.GEntry;
+      model    : Gtk.Tree_Model.Gtk_Tree_Model;
+      store    : Gtk.List_Store.gtk_list_store;
+      ke_select: Gtk.Tree_Selection.gtk_tree_selection;
+      iter     : Gtk.Tree_Model.gtk_tree_iter;
+      col_data : Glib.Values.GValue;
+      ke_date  : Gtk.GEntry.gtk_entry;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                    with_details => "Patient_Details_KE_Date_edited_CB: Start");
-      null;  -- see http://scentric.net/tutorial/sec-treemodel-rowref.html
-      model := Gtk.Tree_View.Get_Model(Gtk.Tree_View.Gtk_Tree_View_Record( 
-                        (Gtkada.Builder.Get_Object(Gtkada_Builder(Object),
+      store := gtk_list_store(Get_Object(GtkAda_Builder(Object),
+                                         "key_events_table"));
+      ke_select:= Get_Selection(Gtk_Tree_View_Record( 
+                                (Get_Object(Gtkada_Builder(Object),
                                          "key_events_tree_view").all))'Access);
-      -- path := 
-      iter := Gtk.Tree_Model.Get_Iter(model, path);
+      Get_Selected(ke_select, model, iter);
+      Get_Value(store, iter, 0, col_data);
+      ke_date := gtk_entry(Get_Object(Object,"entry_ke_date"));
+      Set_Text(ke_date, Glib.Values.Get_String(col_data));
       -- do the equivalent of gtk_tree_model_get(model,&iter,COL_NAME,&name,-1);
       -- then do the equivalent of gtk_list_store_set(liststore,&iter,0,"Joe",-1);
       -- then update the record in the database
@@ -796,13 +1246,20 @@ package body Patient_Details is
       Set_Text(country,     "");
       Set_Text(referral, To_String(from_wide =>
                To_String(from_time => Clock, with_format => "dd/mm/yyyy")));
+      declare
+         use Gtk.List_Store;
+         store : Gtk.List_Store.gtk_list_store;
+      begin
+         store := gtk_list_store(
+                        Gtkada.Builder.Get_Object(Builder,"key_events_table"));
+         Clear(store);
+      end;
    end Clear_Patient_Details_Fields;
 
    procedure Load_Patient_Details_Data
                    (Builder   : access Gtkada_Builder_Record'Class;
                     record_no : record_movement; 
                     refresh   : boolean := false) is
-     
       use GNATCOLL.SQL.Exec;
       use String_Conversions, Calendar_Extensions;
       patientid  : integer;
@@ -888,12 +1345,13 @@ package body Patient_Details is
          end;  -- loading up main table data for patient
       -- Set up: load up the sub-table data (if any)
          declare
+            model    : Gtk.Tree_Model.gtk_tree_model;
             store    : Gtk.List_Store.gtk_list_store;
             iter     : Gtk.Tree_Model.gtk_tree_iter;
             the_data : Glib.Values.GValue;
             Q_events : SQL_Query;
             R_events : Forward_Cursor;
-            use Gtk.List_Store;
+            use Gtk.List_Store, Gtk.Tree_Row_Reference, Gtk.Tree_Model;
          begin
          -- see http://scentric.net/tutorial/sec-treemodel-add-rows.html
          -- Set up the list store field
@@ -911,10 +1369,21 @@ package body Patient_Details is
             while Has_Row(R_events) loop  -- while not end_of_table(KeyEvents)
                Append(store, iter);
                for column_num in 0 .. 2 loop
-               -- KeyEvents (column_num+1): 1=EventDate, 2=Event, 3=Details
-                  Glib.Values.Init_Set_String (the_data, 
-                                        Value(R_events,Field_Index(column_num)));
+                  -- KeyEvents (column_num+1): 1=EventDate, 2=Event, 3=Details
+                  if column_num = 0 then
+                     Glib.Values.Init_Set_String (the_data,
+                        To_String(from_wide => 
+                           To_String(from_time=>Time(tDate_Value(R_events,0)),
+                                     with_format => "dd/mm/yyyy")));
+                  else
+                     Glib.Values.Init_Set_String (the_data, 
+                                      Value(R_events,Field_Index(column_num)));
+                  end if;
                   Set_Value(store, iter, Glib.Gint(column_num), the_data);
+                  -- Set the new last row
+                  Free(last_row);
+                  model := To_Interface(store);
+                  Gtk_New(last_row, model, Get_Path(store, iter));
                end loop;
                Next(R_events);  -- next_record(KeyEvents)
             end loop;

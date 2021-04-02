@@ -39,7 +39,7 @@
 -- with GNATCOLL.SQL_Impl;    use GNATCOLL.SQL_Impl;
 -- with GNATCOLL.SQL.Exec;    use GNATCOLL.SQL.Exec;
 -- with Calendar_Extensions;  use Calendar_Extensions;
-with String_Conversions;
+with String_Conversions, Ada.Strings.Unbounded;
 
 package body GNATCOLL.SQL_Date_and_Time is
 
@@ -82,6 +82,16 @@ package body GNATCOLL.SQL_Date_and_Time is
       else
          return SQL_To_tDate(Val);
       end if;
+   end tDate_Value;
+   
+   function tDate_Value (Self  : GNATCOLL.SQL.Exec.Forward_Cursor; 
+                        Field : GNATCOLL.SQL.Exec.Field_Index) return tDate is
+   begin
+      return SQL_To_tDate(Ada.Strings.Unbounded.To_String(
+                              GNATCOLL.SQL.Exec.Unbounded_Value(Self,Field)));
+      exception
+         when others =>  -- default on error is an 'empty' date
+            return SQL_To_tDate("01/01/0001");
    end tDate_Value;
    
    function "+" (Value : tDate) return SQL_Parameter is
