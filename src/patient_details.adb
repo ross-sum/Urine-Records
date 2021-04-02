@@ -49,6 +49,7 @@ with GNATCOLL.SQL;               use GNATCOLL.SQL;
 with Database;                   use Database;
 with Error_Dialogue;
 with dStrings;
+with Urine_Records_Interlocks;   use Urine_Records_Interlocks;
 package body Patient_Details is
 
    pDB : GNATCOLL.SQL.Exec.Database_Connection;
@@ -130,6 +131,7 @@ package body Patient_Details is
    last_ke_date  : dStrings.text;
    last_ke_event : dStrings.text;
    last_ke_desc  : dStrings.text;
+   treeview_interlock : Urine_Records_Interlocks.Interlock;
 
    procedure Initialise_Patient_Details(Builder : in out Gtkada_Builder;
                           DB_Descr : GNATCOLL.SQL.Exec.Database_Description) is
@@ -518,12 +520,14 @@ package body Patient_Details is
       ke_event:= gtk_text_buffer(Get_Object(Object,"tb_pd_ke_event"));
       ke_desc := gtk_text_buffer(Get_Object(Object,"tb_pd_ke_desc"));
       -- load data into the Zoom tab fields
+      treeview_interlock.Lock;
       Get_Value(store, iter, 0, col_data);
       Set_Text(ke_date, Glib.Values.Get_String(col_data));
       Get_Value(store, iter, 1, col_data); 
       Set_Text(ke_event, Glib.Values.Get_String(col_data));
       Get_Value(store, iter, 2, col_data); 
       Set_Text(ke_desc, Glib.Values.Get_String(col_data));
+      treeview_interlock.Release;
       -- make Delete, New selectable (set sensitive flag)
       Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
           (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_remove")), True);
@@ -636,7 +640,7 @@ package body Patient_Details is
    begin
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Undo_Clicked_CB: Start");
-      -- Get previous/current record number
+      -- Get previous/current record number for both patient and events
       current_record.record_number := Current(R_patient_details);
       -- Get a pointer to the row in the tree view
       store := gtk_list_store(Get_Object(GtkAda_Builder(Object),
@@ -644,6 +648,7 @@ package body Patient_Details is
       ke_select:= Get_Selection(Gtk_Tree_View_Record( 
                                 (Get_Object(Gtkada_Builder(Object),
                                          "key_events_tree_view").all))'Access);
+      treeview_interlock.Lock;
       -- check if Delete is greyed out (not sensitive).  If so then New
       if Get_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
                                                "btn_patient_ke_remove")))
@@ -664,6 +669,7 @@ package body Patient_Details is
          Remove(store, iter);
       end if;
       -- No need to touch the database - it's unchanged.
+      treeview_interlock.Release;
       -- done
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Urine_Records_Undo_Selected_CB: Done");
@@ -672,6 +678,7 @@ package body Patient_Details is
    procedure Btn_Patient_KE_Save_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
       use Gtkada.Builder, Gtk.Tool_Button;
+      use Gtk.Tree_View, Gtk.Tree_Selection;
       use GNATCOLL.SQL.Exec;
       
       function Get_Entry_Text(Builder : access Gtkada_Builder_Record'Class;
@@ -724,11 +731,18 @@ package body Patient_Details is
       
       current_record : record_movement(absolute);
       P_pd     : SQL_Parameters (1 .. 4);
+      tree_view: Gtk.Tree_View.gtk_tree_view;
+      selected : Gtk.Tree_Selection.gtk_tree_selection;
+      model    : Gtk.Tree_Model.Gtk_Tree_Model;
+      iter     : Gtk.Tree_Model.gtk_tree_iter;
    begin  -- Btn_Patient_KE_Save_Clicked_CB
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Save_Clicked_CB: Start");
-      -- Get the current record number
+      -- Get the current record number for both patient and events
       current_record.record_number := Current(R_patient_details);
+      tree_view := gtk_tree_view(Get_Object(Object, "key_events_tree_view"));
+      selected  := Get_Selection(tree_view);
+      Get_Selected(selected, model, iter);
       -- Get all the field values and load into the parameter list
       P_pd := (1 => +Get_Entry_Number(Object, "entry_patient_identifer"),-- Patient
                2 => +Get_Entry_Date(Object, "entry_ke_date"),      -- EventDate
@@ -772,6 +786,8 @@ package body Patient_Details is
          Load_Patient_Details_Data(Builder   => Gtkada_Builder(Object),
                                    record_no => current_record,
                                    refresh   => true);
+         -- then point back to the correct Event row  ****DOESN'T WORK****
+         Select_Iter(selected, iter);  -- set the tree view selection to iter
       else -- some trouble saving
          Error_Dialogue.Show_Error
              (Builder => Gtkada_Builder(Object),
@@ -892,13 +908,18 @@ package body Patient_Details is
          Get_Value(store, iter, 2, the_data);
          last_ke_desc := Value(Glib.Values.Get_String(the_data));
       end if;
-      -- ensure fields in the table view match the Zoom tab
-      Glib.Values.Init_Set_String (the_data,
-                                   Get_Text_View(Object, "tb_pd_ke_event"));
-      Set_Value(store, iter, 1, the_data);
-      Glib.Values.Init_Set_String (the_data,
-                                   Get_Text_View(Object, "tb_pd_ke_desc"));
-      Set_Value(store, iter, 2, the_data);
+      -- ensure fields in the table view match the Zoom tab if editing
+      if Get_Sensitive(Gtk_Tool_Button(Get_Object(Object,
+                                                  "btn_patient_ke_save"))) and
+         (not treeview_interlock.Is_Locked)
+      then
+         Glib.Values.Init_Set_String (the_data,
+                                      Get_Text_View(Object, "tb_pd_ke_event"));
+         Set_Value(store, iter, 1, the_data);
+         Glib.Values.Init_Set_String (the_data,
+                                      Get_Text_View(Object, "tb_pd_ke_desc"));
+         Set_Value(store, iter, 2, the_data);
+      end if;
       -- enable selectability (sensitive flag) of Store, Undo buttons
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
                                                "btn_patient_ke_save")), True);

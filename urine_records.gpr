@@ -66,6 +66,7 @@ project Urine_Records is
       "general_storage_pool.adb", "general_storage_pool.ads",
       "dynamic_lists.adb", "dynamic_lists.ads", 
       "generic_versions.ads","generic_versions.adb","urine_record_version.ads",
+      "urine_records_interlocks.ads", "urine_records_interlocks.adb",
       "main_menu.ads", "main_menu.adb",
       "help_about.ads", "help_about.adb",
       "help_manual.ads", "help_manual.adb",
