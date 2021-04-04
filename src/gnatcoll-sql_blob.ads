@@ -33,19 +33,33 @@
 --  stored in the data base is textual (but not as a UTF-8,  rather  --
 --  as a traditional ASCII character array, values 0..255).          --
    --                                                                   --
-   --  Currently  the package has hit a big snag: 00h is treated as  a  --
-   --  string  terminator by GNATCOLL.  So haven't figured out how  to  --
-   --  read in a full blob (it stops at the first 00h).                 --
+--  Currently  the package has hit a big snag: 00h is treated as  a  --
+--  string  terminator by GNATCOLL.  So haven't figured out how  to  --
+--  read in a full blob (it stops at the first 00h).                 --
+--  That is, because GNATCOLL is brain dead when it comes to blobs,  --
+--  that is, it stores everything as a string and hopes the DB will  --
+--  convert,  and worse, it uses C strings rather than Ada  strings  --
+--  (so  null  terminated), we use a very ugly hack of  storing  as  --
+--  Base  64.  This means that you need to load the blob as a  Base  --
+--  64  (for instance, using the application provided) or  you  let  --
+--  your  application load the so-called 'blob' (which is really  a  --
+--  character string).                                               --
 --                                                                   --
 -----------------------------------------------------------------------
 
 with GNATCOLL.SQL_Impl;    use GNATCOLL.SQL_Impl;
 with GNATCOLL.SQL.Exec;    use GNATCOLL.SQL.Exec;
 with Ada.Strings.Unbounded;
+with Blobs.Base_64;
 package GNATCOLL.SQL_BLOB is
 
-   type byte is new Character range Character'Val(0)..Character'Val(255);
-   type Blob is new Ada.Strings.Unbounded.Unbounded_String;
+   subtype byte is Blobs.byte;
+   -- type Blob is private;
+   type blob is record
+         data : Ada.Strings.Unbounded.Unbounded_String;
+         length : natural;
+      end record;
+   Null_Blob : constant Blob;
 
    function Blob_To_SQL (Format: GNATCOLL.SQL_Impl.Formatter'Class; T : Blob;
                           Quote : boolean := false) return string;
@@ -79,5 +93,10 @@ package GNATCOLL.SQL_BLOB is
    function "&" (the_blob : blob; the_byte : byte) return blob;
    function "&" (the_byte : byte; the_blob : blob) return blob;
    function Length(of_the_blob : in blob) return natural;
+   function Raw_Blob(from_the_blob : blob) return Blobs.blob;
+   function To_Blob(from_raw : Blobs.blob) return Blob;
+   
+   private
+   Null_blob : constant Blob := (Ada.Strings.Unbounded.Null_Unbounded_String, 0);
    
 end GNATCOLL.SQL_BLOB;

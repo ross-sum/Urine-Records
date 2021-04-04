@@ -1094,82 +1094,82 @@ Error encountered when saving the record.
   <object class="GtkImage" id="image_1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">blonde.png</property>
+    <property name="pixbuf">/tmp/1.png</property>
   </object>
   <object class="GtkImage" id="image_10">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">gold.png</property>
+    <property name="pixbuf">/tmp/10.png</property>
   </object>
   <object class="GtkImage" id="image_11">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">apricot.png</property>
+    <property name="pixbuf">/tmp/11.png</property>
   </object>
   <object class="GtkImage" id="image_12">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">orange.png</property>
+    <property name="pixbuf">/tmp/12.png</property>
   </object>
   <object class="GtkImage" id="image_13">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">squash.png</property>
+    <property name="pixbuf">/tmp/13.png</property>
   </object>
   <object class="GtkImage" id="image_14">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">tiger.png</property>
+    <property name="pixbuf">/tmp/14.png</property>
   </object>
   <object class="GtkImage" id="image_15">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">yam.png</property>
+    <property name="pixbuf">/tmp/15.png</property>
   </object>
   <object class="GtkImage" id="image_16">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">fire.png</property>
+    <property name="pixbuf">/tmp/16.png</property>
   </object>
   <object class="GtkImage" id="image_2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">yellow.png</property>
+    <property name="pixbuf">/tmp/2.png</property>
   </object>
   <object class="GtkImage" id="image_3">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">daffodil.png</property>
+    <property name="pixbuf">/tmp/3.png</property>
   </object>
   <object class="GtkImage" id="image_4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">lemon.png</property>
+    <property name="pixbuf">/tmp/4.png</property>
   </object>
   <object class="GtkImage" id="image_5">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">butter.png</property>
+    <property name="pixbuf">/tmp/5.png</property>
   </object>
   <object class="GtkImage" id="image_6">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">pineapple.png</property>
+    <property name="pixbuf">/tmp/6.png</property>
   </object>
   <object class="GtkImage" id="image_7">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">bumblebee.png</property>
+    <property name="pixbuf">/tmp/7.png</property>
   </object>
   <object class="GtkImage" id="image_8">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">tuscan_sun.png</property>
+    <property name="pixbuf">/tmp/8.png</property>
   </object>
   <object class="GtkImage" id="image_9">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">mustard.png</property>
+    <property name="pixbuf">/tmp/9.png</property>
   </object>
   <object class="GtkDialog" id="dialogue_select_urine_colour">
     <property name="can_focus">False</property>
@@ -1756,8 +1756,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -1770,8 +1770,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_next_select_cb" swapped="no"/>
-                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3807,8 +3807,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3821,8 +3821,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_next_select_cb" swapped="no"/>
-                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>

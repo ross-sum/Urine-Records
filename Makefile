@@ -6,6 +6,8 @@
 ACC=gprbuild
 TA=urine_records
 TS=$(TA).gpr
+BA=tobase64
+BS=$(BA).gpr
 HOST_TYPE := $(shell uname -m)
 ifeq ($(HOST_TYPE),amd)
 	TARGET=sparc
@@ -36,13 +38,18 @@ endif
 urinerecords:
 	$(ACC) -P $(TS) $(FLAGS)
 
+tobase64s:
+	$(ACC) -P $(BS) $(FLAGS)
+
 # Define the target "all"
 all:
 	urinerecords:
+	tobase64s:
 
 # Clean up to force the next compilation to be everything
 clean:
 	gprclean -P $(TS)
+	gprclean -P $(BS)
 
 dist-clean: distclean
 
@@ -50,6 +57,7 @@ distclean: clean
 
 install:
 	cp $(TD)/$(TA) $(BIN)
+	cp $(TD)/$(BA) $(BIN)
 	cp $(TD)/$(TA).xml $(VAR)
 	cp $(TD)/$(TA).xsd $(ETC)
 	mkdir -p $(ETC)/init.d/

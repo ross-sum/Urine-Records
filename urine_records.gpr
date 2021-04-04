@@ -57,6 +57,7 @@ project Urine_Records is
    for Source_Files use ("error_log.ads", "error_log.adb",
       "host_functions.ads", "host_functions.adb", "host_functions_thin.ads", 
       "gnatcoll-sql_date_and_time.ads", "gnatcoll-sql_date_and_time.adb",
+      "blobs.ads", "blobs-base_64.ads", "blobs-base_64.adb",
       "gnatcoll-sql_blob.ads", "gnatcoll-sql_blob.adb",
       "database_names.ads", "database.ads", "database.adb",
       "calendar_extensions.ads", "calendar_extensions.adb", 

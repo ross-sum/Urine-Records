@@ -10,9 +10,9 @@
 --  Written by Ross Summerfield.                                     --
 --                                                                   --
 --  This  application  records both catheter  volumes  and  bladder  --
-   --  volumes  for a patient or patients that have undergone  radical  --
-   --  prostatectomy  (removal  of  the  prostate).    The   urologist  --
-   --  typically wants to track the volumes to monitor recovery.        --
+ --  volumes  for a patient or patients that have undergone  radical  --
+--  prostatectomy  (removal  of  the  prostate).    The   urologist  --
+--  typically wants to track the volumes to monitor recovery.        --
 --                                                                   --
 --  Version History:                                                 --
 --  $Log$

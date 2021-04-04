@@ -17,7 +17,7 @@ s#l0
 s#m0src
 s#p0doc
 s#r0obj_amd64
-!1044;g
+!1098;g
 %\011src%surine_record_version.ads
 %\011src%sdatabase_names.ads
 %\011src%smain_menu.adb
@@ -31,12 +31,14 @@ s#r0obj_amd64
 %\011src%sdatabase.adb
 %\011src%smain_menu.ads
 %\011src%spatient_details.adb
+%\011src%stobase64.adb
 %\011src%sget_date_calendar.adb
 %\011src%sgnatcoll-sql_blob.ads
 %\011src%sreport_processor.ads
 %\011src%shelp_about.ads
 %\011src%sdatabase.ads
 %\011src%surine_records.adb
+%\011src%stobase64_version.ads
 %\011src%sgnatcoll-sql_date_and_time.adb
 %\011src%serror_dialogue.adb
 %\011src%sgnatcoll-sql_blob.adb
@@ -51,7 +53,7 @@ s#r0obj_amd64
 %\011src%surine_records_interlocks.adb
 %\011src%surine_records_form.adb
 %\011src%sgnatcoll-sql_date_and_time.ads
-!1044;f
+!1098;f
 %\011src%surine_record_version.ads
 %\011src%sdatabase_names.ads
 %\011src%smain_menu.adb
@@ -65,12 +67,14 @@ s#r0obj_amd64
 %\011src%sdatabase.adb
 %\011src%smain_menu.ads
 %\011src%spatient_details.adb
+%\011src%stobase64.adb
 %\011src%sget_date_calendar.adb
 %\011src%sgnatcoll-sql_blob.ads
 %\011src%sreport_processor.ads
 %\011src%shelp_about.ads
 %\011src%sdatabase.ads
 %\011src%surine_records.adb
+%\011src%stobase64_version.ads
 %\011src%sgnatcoll-sql_date_and_time.adb
 %\011src%serror_dialogue.adb
 %\011src%sgnatcoll-sql_blob.adb

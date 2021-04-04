@@ -1,0 +1,62 @@
+   -----------------------------------------------------------------------
+   --                                                                   --
+   --                           T O   B A S E 6 4                       --
+   --                                                                   --
+   --                             P r o j e c t                         --
+   --                                                                   --
+   --                           $Revision: 1.0 $                        --
+   --                                                                   --
+   --  Copyright (C) 2021  Hyper Quantum Pty Ltd.                       --
+   --  Written by Ross Summerfield.                                     --
+   --                                                                   --
+   --  This application converts a blob to Base 64 format.              --
+   --                                                                   --
+   --  Version History:                                                 --
+   --  $Log$
+   --                                                                   --
+   --  ToBase64  is  free  software; you can  redistribute  it  and/or  --
+   --  modify  it under terms of the GNU  General  Public  Licence  as  --
+   --  published by the Free Software Foundation; either version 2, or  --
+   --  (at  your option) any later version.  ToBase64  is  distributed  --
+   --  in  hope  that  it will be useful, but  WITHOUT  ANY  WARRANTY;  --
+   --  without even the implied warranty of MERCHANTABILITY or FITNESS  --
+   --  FOR  A PARTICULAR PURPOSE.  See the GNU General Public  Licence  --
+   --  for  more details.  You should have received a copy of the  GNU  --
+   --  General Public Licence distributed with ToBase64. If not, write  --
+   --  to  the  Free Software Foundation, 51  Franklin  Street,  Fifth  --
+   --  Floor, Boston, MA 02110-1301, USA.                               --
+   --                                                                   --
+   -----------------------------------------------------------------------
+with "adasockets";
+with "../dynamic-strings/dstrings";
+project ToBase64 is
+
+   type Hware_Option is ("sparc", "amd64", "x86", "pi");
+   Hware : Hware_Option := external ("hware", "amd64");
+
+   for Languages use ("ada");
+   case Hware is
+   when "pi" =>
+      for Source_Dirs use ("src/", "../tools/");
+   when others =>
+      for Source_Dirs use ("src/", "../tools/");
+   end case;
+   for Main use ("tobase64.adb");
+   --  Using "hware" variable for obj directory
+   for Object_Dir use "obj_" & hware & "/";
+
+   package Ide is
+      for Documentation_Dir use "doc/";
+   end Ide;
+
+   for Source_Files use ("error_log.ads", "error_log.adb",
+      "dynamic_lists.adb", "dynamic_lists.ads",
+      "host_functions.ads", "host_functions.adb", "host_functions_thin.ads", 
+      "blobs.ads", "blobs-base_64.ads", "blobs-base_64.adb",
+      "string_conversions.ads", "string_conversions.adb",
+      "generic_command_parameters.ads", "generic_command_parameters.adb", 
+      "general_storage_pool.adb", "general_storage_pool.ads",
+      "generic_versions.ads","generic_versions.adb","tobase64_version.ads",
+      "tobase64.adb");
+
+end ToBase64;

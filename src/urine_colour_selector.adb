@@ -81,7 +81,7 @@ package body Urine_Colour_Selector is
             colour_blocks(colour_id) := 
                              wavelength(Glib.Gint(Integer_Value(R_colour, 0)));
             -- write out the image into the temporary directory
-            declare  -- FOLLOWING IS BUSTED UNTIL BLOB CAN READ IN 00h!
+            declare
                use string_conversions;
                output_file : file_type;
                the_image   : blob := Blob_Value(R_colour, 2);
@@ -89,8 +89,6 @@ package body Urine_Colour_Selector is
                              Value(of_string=>Put_Into_String(item=>colour_id))
                              & ".png";
             begin
-               Error_Log.Debug_Data(at_level => 6, 
-                           with_details=>"Initialise_Colour_Selector: '" & To_Wide_String(file_name) & "' length=" & To_Wide_String(Length(the_image)'Image));
                if Length(the_image) > 0 then
                   Create(output_file, Out_File, file_name);
                   for byte_number in 1 .. Length(the_image) loop
@@ -104,13 +102,6 @@ package body Urine_Colour_Selector is
             Next(R_colour);  -- next record(ColourChart)
             colour_id := colour_id + 1;
          end loop;
-         -- for row_num in 1 .. colour_id - 1 loop
-            -- Q_string := "SELECT writefile(" & Put_Into_String(item=>row_num) &
-               --          "'.png',img) FROM images WHERE Value=" &
-               --          Put_Into_String(item=>row_num) & ';';
-               --Value(of_string=>Q_string)
-            -- null;
-         -- end loop;
       end if;
       -- Register the handlers
       Register_Handler(Builder      => Builder,
