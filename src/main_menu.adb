@@ -32,7 +32,7 @@
 --                                                                   --
 -----------------------------------------------------------------------
 -- with Gtkada.Builder;  use Gtkada.Builder;
-with Gtk.Widget;
+with Gtk.Widget, Gtk.Image;
 with Gtk.Main;
 with Gtk.Enums;
 with Glib, Glib.Error;
@@ -51,8 +51,6 @@ with Report_Processor;
 -- with GNATCOLL.SQL.Exec;
 package body Main_Menu is
 
-   glade_filename : constant string := "urine_records.glade";
-    
    procedure Set_Up_Reports_Menu_and_Buttons (Builder : Gtkada_Builder) is
       use Gtk.Button, Gtk.Menu, Gtk.Menu_Item;
       use Report_Processor;
@@ -104,7 +102,8 @@ package body Main_Menu is
                            with_tex_path : text;
                            with_pdf_path : text;
                            with_R_path   : text;
-                           path_to_temp  : string := "/tmp/") is
+                           path_to_temp  : string := "/tmp/";
+                           glade_filename: string := "urine_records.glade") is
       use Glib.Error, Ada.Characters.Conversions;
       type GError_Access is access Glib.Error.GError;
       Builder : Gtkada_Builder;
@@ -116,7 +115,7 @@ package body Main_Menu is
       -- Create a Builder and add the XML data
       Gtk.Main.Init;
       Gtk_New (Builder);
-      count := Add_From_File (Builder, glade_filename, Error);
+      count := Add_From_File (Builder, path_to_temp & glade_filename, Error);
       if Error /= null then
          Error_Log.Put(the_error    => 201, 
                        error_intro  => "Initialise_Main_Menu: file name error",
@@ -172,7 +171,18 @@ package body Main_Menu is
                                   path_to_temp  => path_to_temp);
       -- Set up the Reports menu (needs to be done after report processor is
       -- initialised)
-      Set_Up_Reports_Menu_and_Buttons(Builder);                
+      Set_Up_Reports_Menu_and_Buttons(Builder);
+      
+      -- Point images in Glade file to unloaded area in the temp directory
+      declare
+         use Gtk.Image;
+         no_2_image : Gtk.Image.gtk_image;
+         image_name : constant string := "chkbtn_no2_image";
+         file_name  : constant string := path_to_temp & "toilet_action.jpeg";
+      begin
+         no_2_image := gtk_image(Get_Object(Builder, image_name));
+         Set(image => no_2_image, Filename=> file_name);
+      end;
       
       -- Initialise
       Do_Connect (Builder);

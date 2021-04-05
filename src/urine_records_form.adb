@@ -697,7 +697,7 @@ package body Urine_Records_Form is
       function Get_Combo_ID(Builder : access Gtkada_Builder_Record'Class;
                             combo, 
                             liststore : Glib.UTF8_String) return integer is
-         use Gtk.Combo_Box, Gtk.Tree_Selection, Gtk.List_Store, Glib;
+         use Gtk.Combo_Box, Gtk.Tree_Selection, Gtk.List_Store, Glib, String_Conversions;
          iter     : Gtk.Tree_Model.gtk_tree_iter;
          store    : Gtk.List_Store.gtk_list_store;
          col_data : Glib.Values.GValue;
@@ -740,7 +740,7 @@ package body Urine_Records_Form is
       
       function Get_Entry_Text(Builder : access Gtkada_Builder_Record'Class;
                             the_entry : Glib.UTF8_String) return string is
-         use Gtk.GEntry;
+         use Gtk.GEntry, String_Conversions;
          entry_box : Gtk.GEntry.gtk_entry;
       begin
          entry_box := gtk_entry(Get_Object(Builder, the_entry));
@@ -798,8 +798,8 @@ package body Urine_Records_Form is
                        with_details => "Urine_Records_Save_Selected_CB: Start");
       -- Check we have a valid set of key fields
       if Get_Combo_ID(Object,"combo_ur_patient_name","liststore_patients")<=0
-         or Get_Entry_Text(Object, "entry_cur_date")'Length = 0
-         or Get_Entry_Text(Object, "entry_cur_time")'Length = 0
+         or Get_Entry_Text(Object, "entry_ur_date")'Length = 0
+         or Get_Entry_Text(Object, "entry_ur_time")'Length = 0
       then
          Error_Log.Debug_Data(at_level    =>6, 
                               with_details=>"Urine_Records_Save_Selected_CB: "&

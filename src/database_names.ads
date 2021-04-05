@@ -7,6 +7,8 @@ package database_Names is
    Ta_Catheterurinerecord : constant Cst_String_Access := TC_Catheterurinerecord'Access;
    TC_Colourchart : aliased constant String := """ColourChart""";
    Ta_Colourchart : constant Cst_String_Access := TC_Colourchart'Access;
+   TC_Configurations : aliased constant String := """Configurations""";
+   Ta_Configurations : constant Cst_String_Access := TC_Configurations'Access;
    TC_Floaties : aliased constant String := """Floaties""";
    Ta_Floaties : constant Cst_String_Access := TC_Floaties'Access;
    TC_Holdstates : aliased constant String := """HoldStates""";
@@ -42,6 +44,8 @@ package database_Names is
    N_Country : constant Cst_String_Access := NC_Country'Access;
    NC_Description : aliased constant String := """Description""";
    N_Description : constant Cst_String_Access := NC_Description'Access;
+   NC_Detformat : aliased constant String := """DetFormat""";
+   N_Detformat : constant Cst_String_Access := NC_DetFormat'Access;
    NC_Details : aliased constant String := """Details""";
    N_Details : constant Cst_String_Access := NC_Details'Access;
    NC_Event : aliased constant String := """Event""";
@@ -108,10 +112,10 @@ package database_Names is
    N_Utime : constant Cst_String_Access := NC_UTime'Access;
    NC_Urges : aliased constant String := """Urges""";
    N_Urges : constant Cst_String_Access := NC_Urges'Access;
+NC_Image : aliased constant String := """Image""";
+N_Image : constant Cst_String_Access := NC_Image'Access;
    NC_Value : aliased constant String := """Value""";
    N_Value : constant Cst_String_Access := NC_Value'Access;
    NC_Volume : aliased constant String := """Volume""";
    N_Volume : constant Cst_String_Access := NC_Volume'Access;
-   NC_Image : aliased constant String := """Image""";
-   N_Image : constant Cst_String_Access := NC_Image'Access;
 end database_Names;

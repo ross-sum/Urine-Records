@@ -34,7 +34,7 @@
 -- with GNATCOLL.SQL.Exec;
 with Glib, Glib.Values, Gtk.Widget;
 with Gtk.Tree_Selection, Gtk.Tree_Model, Gtk.List_Store;
-with Gtk.Button, Gtk.Enums;
+with Gtk.Button, Gtk.Enums, Gtk.Image;
 with Error_Log;
 with Urine_Record_Version;
 with String_Conversions;
@@ -82,19 +82,26 @@ package body Urine_Colour_Selector is
                              wavelength(Glib.Gint(Integer_Value(R_colour, 0)));
             -- write out the image into the temporary directory
             declare
-               use string_conversions;
+               use string_conversions, Gtk.Image;
                output_file : file_type;
                the_image   : blob := Blob_Value(R_colour, 2);
                file_name   : constant string := path_to_temp &
                              Value(of_string=>Put_Into_String(item=>colour_id))
                              & ".png";
+               image_name  : constant string := "image_" & 
+                             Value(of_string=>Put_Into_String(item=>colour_id));
+               image_widget: Gtk.Image.gtk_image;
             begin
                if Length(the_image) > 0 then
+                  -- output the image file.
                   Create(output_file, Out_File, file_name);
                   for byte_number in 1 .. Length(the_image) loop
                      Write(output_file, Element(the_image, byte_number));
                   end loop;
                   Close(output_file);
+                  -- set the image widget to point to it
+                  image_widget := gtk_image(Get_Object(Builder, image_name));
+                  Set(image => image_widget, Filename=> file_name);
                end if;
                exception
                   when Status_Error => null;  -- file already exists

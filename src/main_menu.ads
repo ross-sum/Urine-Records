@@ -43,7 +43,8 @@ package Main_Menu is
                            with_tex_path : text;
                            with_pdf_path : text;
                            with_R_path   : text;
-                           path_to_temp  : string := "/tmp/");
+                           path_to_temp  : string := "/tmp/";
+                           glade_filename: string := "urine_records.glade");
 
 private
 

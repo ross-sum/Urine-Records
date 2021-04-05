@@ -11,6 +11,13 @@
 #
 # where <filename> is the name of this file (nominally database_schema.dbmodel).
 
+# Configuration details table for special information used by the application.
+| TABLE        | Configurations | configs     || Configuration details       |
+| ID           | INTEGER        | PK,NOT NULL || Index into config items     |
+| Name         | CHARACTER(100) |             || Could be a file name, etc.  |
+| DetFormat    | Character(1)   |             || Detls fmt: T=Text,B=Base64  |
+| Details      | TEXT           |             || (actually a blob)           |
+
 # Pad sizes look-up table for drop-down list
 | TABLE        | PadSizes       | pad_size    || The pads that could be used |
 | ID           | INTEGER        | PK,NOT NULL || Pad size unique identifier  |

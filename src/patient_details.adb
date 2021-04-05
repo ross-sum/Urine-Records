@@ -273,9 +273,12 @@ package body Patient_Details is
    begin
       -- Clear all fields
       Clear_Patient_Details_Fields(Gtkada_Builder(Object));
-      -- Set the focus to the Patient drop-down list
+      -- Set a default patient number.
       entry_patient := gtk_entry(Get_Object(Gtkada_Builder(Object), 
                                                 "entry_patient_identifer"));
+      Set_Text(entry_patient, 
+               Glib.UTF8_String(Integer'Image(Number_of_PD_Records(Object)+1)));
+      -- Set the focus to the Patient number field  -- DOESN'T WORK!
       can_focus := Get_Can_Focus(entry_patient);
       Set_Can_Focus(entry_patient, true);
       Grab_Focus(entry_patient);

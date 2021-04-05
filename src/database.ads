@@ -104,6 +104,34 @@ Image : SQL_Field_Blob (Ta_Colourchart, Instance, N_Image, Index);
       is new T_Abstract_Colourchart (null, Index) with null record;
    --  To use aliases in the form name1, name2,...
 
+   type T_Abstract_Configurations
+      (Instance : Cst_String_Access;
+       Index    : Integer)
+   is abstract new SQL_Table (Ta_Configurations, Instance, Index) with
+   record
+      Id : SQL_Field_Integer (Ta_Configurations, Instance, N_Id, Index);
+      --  Index into config items
+
+      Name : SQL_Field_Text (Ta_Configurations, Instance, N_Name, Index);
+      --  Could be a file name, etc.
+
+      Detformat : SQL_Field_Text (Ta_Configurations, Instance, N_Detformat, Index);
+      --  Detls fmt: T=Text,B=Base64
+
+      Details : SQL_Field_Text (Ta_Configurations, Instance, N_Details, Index);
+      --  (actually a blob)
+
+   end record;
+
+   type T_Configurations (Instance : Cst_String_Access)
+      is new T_Abstract_Configurations (Instance, -1) with null record;
+   --  To use named aliases of the table in a query
+   --  Use Instance=>null to use the default name.
+
+   type T_Numbered_Configurations (Index : Integer)
+      is new T_Abstract_Configurations (null, Index) with null record;
+   --  To use aliases in the form name1, name2,...
+
    type T_Abstract_Floaties
       (Instance : Cst_String_Access;
        Index    : Integer)
@@ -418,6 +446,7 @@ Image : SQL_Field_Blob (Ta_Colourchart, Instance, N_Image, Index);
    Catheterleakage : T_Catheterleakage (null);
    Catheterurinerecord : T_Catheterurinerecord (null);
    Colourchart : T_Colourchart (null);
+   Configurations : T_Configurations (null);
    Floaties : T_Floaties (null);
    Holdstates : T_Holdstates (null);
    Keyevents : T_Keyevents (null);
