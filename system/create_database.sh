@@ -7,9 +7,32 @@
 # but we have already set up gnatcoll_db2ada
 gnatcoll_sqlite2ada -dbtype=sqlite -createdb -dbmodel=database_schema.dbmodel -dbname=urine_records.db
 
+# Set up the blob fields to load.  Requires tobase64 to be on the search path.
+tobase64 -i 1.png -o 1.b64
+tobase64 -i 2.png -o 2.b64
+tobase64 -i 3.png -o 3.b64
+tobase64 -i 4.png -o 4.b64
+tobase64 -i 5.png -o 5.b64
+tobase64 -i 6.png -o 6.b64
+tobase64 -i 7.png -o 7.b64
+tobase64 -i 8.png -o 8.b64
+tobase64 -i 9.png -o 9.b64
+tobase64 -i 10.png -o 10.b64
+tobase64 -i 11.png -o 11.b64
+tobase64 -i 12.png -o 12.b64
+tobase64 -i 13.png -o 13.b64
+tobase64 -i 14.png -o 14.b64
+tobase64 -i 15.png -o 15.b64
+tobase64 -i 16.png -o 16.b64
+tobase64 -i ../src/urine_records.png -o urine_records.b64
+tobase64 -i ../src/toilet_action.jpeg -o toilet_action.b64
+
 # Load up the default data:
 /usr/local/bin/sqlite3 urine_records.db < default_data.sql
 sqlite3 urine_records.db < default_reports.sql
+
+# Clean up the base 64 fields after their being used
+rm *.b64
 
 # Create the Ada packages for the database (database.ads, database.adb...)
 gnatcoll_sqlite2ada -dbtype=sqlite -api database -dbmodel=database_schema.dbmodel
