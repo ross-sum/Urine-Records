@@ -4646,6 +4646,8 @@ Error encountered when saving the record.
 
 Urine Records is designed to assist patients such as prostate cancer recovery patients record urine volume levels post operation.  It records catheter bag volumes post surgery and urine volumes post catheter removal.  The application allows for patients to record spasms should they encounter such a side-effect, as well as urges, in terms of numbers experienced prior to urination.  For spasms, it also records intensity.  By default, these are based on the amount of force and therefore the amount of leakage (assuming a strong spasm causes overflow from the pad into underwear and a very strong spasm causes overflow to soak through trousers).
 
+Generally, the instruments you require are a graduated jug (you can purchase a cheap jug and then graduate using a marker pen and syringes from the hospital if necessary), perhaps a small graduated jar (useful when passing stools and also recording urine volumes) and gram-accurate scales.  To help with recording catheter bag volumes, a 2 litre jug is useful.
+
 &lt;H2&gt;To Do:&lt;/H2&gt;
 Outstanding features required of the application are a means of editing each of the look-up tables.  This will allow, for instance, a patient to change the way spasm strengths are recorded.
 
@@ -4662,14 +4664,27 @@ The Catheter Urine Records form and the Urine Records Form do not update the dro
 This Manual should be displayed using a mark-up to highlight headings and the like.  At the moment it does not do that, rather it just displays plain text (with the mark-up displayed as plain text).
 
 &lt;H2&gt;Updates&lt;/H2&gt;
-Updates are availble from Hyper Quantum's website, www.hyperquantum.com, or in particular from the ftp website ftp.hyperquantum.com.  The application is also available on GitHub in source code format.  Written in Ada, it can be compiled to run on pretty much any operating system.
+Updates are available from Hyper Quantum's website, www.hyperquantum.com, or in particular from the ftp website ftp.hyperquantum.com.  The application is also available on GitHub in source code format.  Written in Ada, it can be compiled to run on pretty much any operating system.
 
 &lt;H1&gt;Patient Details&lt;/H1&gt;
 Patient Details must be set up as the very first operation with this application.  A patient is required for recording volumes for both the catheter and straight urine expulsion against.
 
+For Patient Details, there is a separate tool bar for the Events table.  This tool bar must be used for editing the Events table.  The main tool bar only applies to the main Patient Details information, not the Events table.
 
+When pressing the New tool bar button, or selecting File|New from the menus, a new record is set up, with the patient number defaulting to the next patient number.  The minimum provision in Patient Details is the patient's name.
+Information is saved when the Save button on the tool bar or File|Save is selected.  Nothing is saved until the Save operation is executed.  If you wish to revert, you can press the Undo tool bar button or selecting File|Undo.
+
+The Events sub-table is for recording significant events, for instance, when the catheter was removed, any events where 'dilation' is performed, specific drugs are commenced or stopped or any other noteworthy information.  It is principally for personal use.
+
+To create a new Event, click on the New button on the Events tool bar (the vertical tool bar next to the Events table).  Then click on the Zoom tab to enter details for this event.  The event date can be selected using a date picker by clicking on the small button within the Date entry box.  The event takes a short title and has an unlimited length description field to enter details about the event into.  When done, press the Save button on the Events tool bar.
 
 &lt;H1&gt;Catheter Urine Records&lt;/H1&gt;
+
+The Catheter Urine Records form allows the entry of information relating to the catheter.  It records details of whenever the bag is emptied.  Details recorded are the volume, the colour of the urine (used to identify the amount of blood still leaking into the urine, in addition to other matters such as whether enough water is being consumed), leakage into a pad (it can be that there is some leakage, for instance if you endure spasms - this can be a side effect of the catheter being in for an extended period of time for instance), and whether there are any particles ("floaties") such as blood clots or other material in the urine.
+
+To create a new record, click on the New button on the tool bar or select File|New from the menu.  The Insert button is a short cut for New.  Select the patient if necessary, select the date (defaults to the current day), time (defaults to the current time), enter the volume, select the colour from the drop-down list or alternatively from the colour selector by clicking on the icon in the Colour entry box, then select the level of leakage and the degree of floaties.  To save, click on Save or choose File|Save (short cut is Ctrl-s).
+
+To move between records, Ctrl-&lt;right arrow&gt; goes forward, Ctrl-&lt;left arrow&gt; goes backward.  View menu contains the menu entries for record movement.
 
 &lt;H1&gt;Urine Records&lt;/H1&gt;
 
@@ -4700,7 +4715,7 @@ Initialise also configures the path to the temporary directory, which is set to 
 &lt;H2&gt;Run_The_Report&lt;/H2&gt;
 Run the specified report number, executing the queries pointed to by the report number in their numerical sequence, then, if required, generating any diagrams or graphs, then generating the LaTex and finally producing a PDF using pdf2latex.
 
-Using nesting, the reports may have groups (and groups within groups) as group headers and footers to contain detailed data.   All data used in the report is taken from a temporary database, temp.db, which is stored in the temporary directory (/tmp/ on unix).  This database is in SQLite (version 3) format, so this module is compiled with the GNATCOLL.SQL.Sqlite package.
+Using nesting, the reports may have groups (and groups within groups) as group headers and footers to contain detailed data.   All data used in the report is taken from a temporary database, temp.db, which is stored in the temporary directory (/tmp/ on Unix).  This database is in SQLite (version 3) format, so this module is compiled with the GNATCOLL.SQL.Sqlite package.
 
 Full details on the syntax or format is with the sub-component declarations in the sub-sections below.
 
