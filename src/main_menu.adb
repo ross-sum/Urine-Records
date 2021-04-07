@@ -152,6 +152,17 @@ package body Main_Menu is
                        Handler_Name => "btn_urine_records_clicked_cb",
                        Handler      => Btn_Urine_Records_Clicked_CB'Access);
       
+      -- Point images in Glade file to unloaded area in the temp directory
+      declare
+         use Gtk.Image;
+         no_2_image : Gtk.Image.gtk_image;
+         image_name : constant string := "chkbtn_no2_image";
+         file_name  : constant string := path_to_temp & "toilet_action.jpeg";
+      begin
+         no_2_image := gtk_image(Get_Object(Builder, image_name));
+         Set(image => no_2_image, Filename=> file_name);
+      end;
+      
       -- Set up child forms
       Help_About.Initialise_Help_About(Builder, usage);
       Help_Manual.Initialise_Manual(Builder);
@@ -172,17 +183,6 @@ package body Main_Menu is
       -- Set up the Reports menu (needs to be done after report processor is
       -- initialised)
       Set_Up_Reports_Menu_and_Buttons(Builder);
-      
-      -- Point images in Glade file to unloaded area in the temp directory
-      declare
-         use Gtk.Image;
-         no_2_image : Gtk.Image.gtk_image;
-         image_name : constant string := "chkbtn_no2_image";
-         file_name  : constant string := path_to_temp & "toilet_action.jpeg";
-      begin
-         no_2_image := gtk_image(Get_Object(Builder, image_name));
-         Set(image => no_2_image, Filename=> file_name);
-      end;
       
       -- Initialise
       Do_Connect (Builder);

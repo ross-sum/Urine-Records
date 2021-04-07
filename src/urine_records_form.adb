@@ -455,13 +455,13 @@ package body Urine_Records_Form is
       begin
          R_list.Fetch (Connection => DB, Query => Q_lookup);
          if Success(DB) and then Has_Row(R_list) then
-         -- Set up the list store field
+            -- Set up the list store field
             store := gtk_list_store(
                           Gtkada.Builder.Get_Object(Builder, list_store_name));
             Clear(store);  -- empty the sub-table ready for the new data
             while Has_Row(R_list) loop  -- while not end_of_table
                Append(store, iter);
-            -- PatientDetails (column_num): 0=Identifier, 1=Patient
+               -- PatientDetails (column_num): 0=Identifier, 1=Patient
                Set(store, iter, 0, Glib.Gint(Integer_Value(R_list, 0)));
                Set(store, iter, 1, Glib.UTF8_String(Value(R_list, 1)));
                if fields > 2 then

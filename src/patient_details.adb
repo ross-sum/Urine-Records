@@ -75,7 +75,7 @@ package body Patient_Details is
                                  (PatientDetails.AddressLine2= Text_Param(4)) &
                                  (PatientDetails.Town        = Text_Param(5)) &
                                  (PatientDetails.State       = Text_Param(6)) &
-                                 (PatientDetails.State       = Text_Param(7)) &
+                                 (PatientDetails.Country     = Text_Param(7)) &
                                  (PatientDetails.ReferralDate=tDate_Param(8))),
             On_Server => True,
             Use_Cache => False);
@@ -88,7 +88,7 @@ package body Patient_Details is
                                 (PatientDetails.AddressLine2= Text_Param(4)) &
                                 (PatientDetails.Town        = Text_Param(5)) &
                                 (PatientDetails.State       = Text_Param(6)) &
-                                (PatientDetails.State       = Text_Param(7)) &
+                                (PatientDetails.Country     = Text_Param(7)) &
                                 (PatientDetails.ReferralDate=tDate_Param(8)),
                        Where => (PatientDetails.Identifier =Integer_Param(9))),
             On_Server => True,
@@ -362,6 +362,34 @@ package body Patient_Details is
                               with_format => "dd/mm/yyyy"));
       end Get_Entry_Date;
       
+      procedure Load_Combo_Box(Q_lookup: SQL_Query; list_store_name: string) is
+         R_list   : Forward_Cursor;
+         store    : Gtk.List_Store.gtk_list_store;
+         iter     : Gtk.Tree_Model.gtk_tree_iter;
+         use Gtk.List_Store, String_Conversions;
+      begin
+         R_list.Fetch (Connection => pDB, Query => Q_lookup);
+         if Success(pDB) and then Has_Row(R_list) then
+            -- Set up the list store field
+            store := gtk_list_store(
+                          Gtkada.Builder.Get_Object(Object, list_store_name));
+            Clear(store);  -- empty the sub-table ready for the new data
+            while Has_Row(R_list) loop  -- while not end_of_table
+               Append(store, iter);
+               -- PatientDetails (column_num): 0=Identifier, 1=Patient
+               Set(store, iter, 0, Glib.Gint(Integer_Value(R_list, 0)));
+               Set(store, iter, 1, Glib.UTF8_String(Value(R_list, 1)));
+               Error_Log.Debug_Data(at_level => 6, 
+                            with_details=>"Patient_Details_Save_Selected_CB: "&
+                                              To_Wide_String(Value(R_list,1)));
+               Next(R_list);  -- next_record(PatientDetails)
+            end loop;
+            Error_Log.Debug_Data(at_level => 5, 
+                            with_details=>"Patient_Details_Save_Selected_CB: "&
+                                    To_Wide_String(list_store_name)&" loaded");
+         end if;
+      end Load_Combo_Box;
+      
       current_record : record_movement(absolute);
       P_pd      : SQL_Parameters (1 .. 8);
       add_line2 : string := Get_Entry_Text(Object, "entry_address_line_2");
@@ -417,6 +445,17 @@ package body Patient_Details is
          Load_Patient_Details_Data(Builder   => Gtkada_Builder(Object),
                                    record_no => current_record,
                                    refresh   => true);
+         declare
+            Q_pd       : SQL_Query;
+         begin
+            Q_pd := SQL_Select
+               (Fields  => PatientDetails.Identifier & PatientDetails.Patient,
+                From    => PatientDetails,
+                Where   => PatientDetails.Identifier >= 0,
+                Order_By=> PatientDetails.Patient);
+            Load_Combo_Box(Q_lookup        => Q_pd, 
+                           list_store_name => "liststore_patients");
+         end;
       else -- some trouble saving
          Error_Dialogue.Show_Error
              (Builder => Gtkada_Builder(Object),
@@ -531,11 +570,9 @@ package body Patient_Details is
       Get_Value(store, iter, 2, col_data); 
       Set_Text(ke_desc, Glib.Values.Get_String(col_data));
       treeview_interlock.Release;
-      -- make Delete, New selectable (set sensitive flag)
+      -- make Delete, selectable (set sensitive flag)
       Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
           (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_remove")), True);
-      Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
-          (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_add")), True);
       -- make Undo, Save not selectable (reset sensitive flag)
       Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
           (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_undo")), False);
@@ -617,7 +654,9 @@ package body Patient_Details is
          Select_Iter(ke_select, current);  -- select the added blank row
       end if;
       -- new_iter now points to the inserted row
-      -- disable selectability (sensitive flag) of Store, Delete buttons
+      -- disable selectability (sensitive flag) of Add, Store, Delete buttons
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_add")), False);
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
                                                "btn_patient_ke_save")), False);
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
@@ -673,6 +712,8 @@ package body Patient_Details is
       end if;
       -- No need to touch the database - it's unchanged.
       treeview_interlock.Release;
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_add")), True);
       -- done
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Urine_Records_Undo_Selected_CB: Done");
@@ -751,9 +792,9 @@ package body Patient_Details is
                2 => +Get_Entry_Date(Object, "entry_ke_date"),      -- EventDate
                3 => +Get_Text_View(Object, "tb_pd_ke_event"),      -- Event
                4 => +Get_Text_View(Object, "tb_pd_ke_desc"));      -- Details
-      -- check if Delete is greyed out (not sensitive).  If so then New
+      -- check if Add is greyed out (not sensitive).  If so then New
       if Get_Sensitive(Gtk_Tool_Button(Get_Object(Object,
-                                                  "btn_patient_ke_remove")))
+                                                  "btn_patient_ke_add")))
       then  -- Not a new entry - Update existing record
          -- build out the parameter list to include the current record's
          -- key fields
@@ -801,7 +842,9 @@ package body Patient_Details is
                                                "btn_patient_ke_save")), False);
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
                                                "btn_patient_ke_undo")), False);
-      -- make Delete, Clear selectable (set sensitive flag)
+      -- make Add, Delete, Clear selectable (set sensitive flag)
+      Set_Sensitive(Gtk_Tool_Button(Get_Object(Gtkada_Builder(Object),
+                                               "btn_patient_ke_add")), True);
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,
                                                "btn_patient_ke_remove")),True);
       Set_Sensitive(Gtk_Tool_Button(Get_Object(Object,

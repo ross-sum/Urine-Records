@@ -1756,8 +1756,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                         <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
+                        <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -1770,8 +1770,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_next_select_cb" swapped="no"/>
-                        <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                         <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
+                        <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -2447,6 +2447,7 @@ Error encountered when saving the record.
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="file_new_pd_select_cb" swapped="no"/>
+                        <accelerator key="Insert" signal="activate"/>
                       </object>
                     </child>
                     <child>
@@ -2457,6 +2458,7 @@ Error encountered when saving the record.
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="file_undo_pd_activate_cb" swapped="no"/>
+                        <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -2467,6 +2469,7 @@ Error encountered when saving the record.
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="file_save_pd_activate_cb" swapped="no"/>
+                        <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -2477,6 +2480,7 @@ Error encountered when saving the record.
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="file_delete_pd_activate_cb" swapped="no"/>
+                        <accelerator key="Delete" signal="activate"/>
                       </object>
                     </child>
                     <child>
@@ -2493,6 +2497,7 @@ Error encountered when saving the record.
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="file_close_pd_select_cb" swapped="no"/>
+                        <accelerator key="F4" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                   </object>
@@ -2543,6 +2548,60 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="events_pd">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">E_vents</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="events_new_pd">
+                        <property name="label">gtk-new</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="btn_patient_ke_add_clicked_cb" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="events_undo_pd">
+                        <property name="label">gtk-undo</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="btn_patient_ke_undo_clicked_cb" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="events_save_pd">
+                        <property name="label">gtk-save</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="btn_patient_ke_save_clicked_cb" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="events_delete_pd">
+                        <property name="label">gtk-delete</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="btn_patient_ke_remove_clicked_cb" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -3655,6 +3714,7 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_undo_ur_activate_cb" swapped="no"/>
+                        <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3807,8 +3867,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                         <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
+                        <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3821,8 +3881,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_next_select_cb" swapped="no"/>
-                        <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                         <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
+                        <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
