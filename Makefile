@@ -58,12 +58,4 @@ distclean: clean
 install:
 	cp $(TD)/$(TA) $(BIN)
 	cp $(TD)/$(BA) $(BIN)
-	cp $(TD)/$(TA).xml $(VAR)
-	cp $(TD)/$(TA).xsd $(ETC)
-	mkdir -p $(ETC)/init.d/
-	cp $(TD)/$(TA).rc $(ETC)/init.d/$(TA)
-	mkdir -p $(ETC)/default/
-	cp $(TD)/$(TA).default $(ETC)/default/$(TA)
-	mkdir -p $(ETC)/systemd/system/
-	cp $(TD)/$(TA).service $(ETC)/systemd/system/
 
