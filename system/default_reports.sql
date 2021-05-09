@@ -6,8 +6,8 @@ INSERT INTO Queries VALUES (1, 1, "", "DROP TABLE Temp1;");
 INSERT INTO Queries VALUES (1, 2, "", "CREATE TABLE Temp1 (Patient VARCHAR(80), UDate DATE, UTime TIME, Volume INTEGER, Colour VARCHAR(10), Floaties VARCHAR(12), Leakage VARCHAR(15));");
 INSERT INTO Queries VALUES (1, 3, "Temp1", "SELECT PD.Patient, UR.UDate, UR.UTime, UR.Volume, C.Colour, F.Floatie AS Floaties, L.Leakage FROM CatheterUrineRecord UR LEFT JOIN ColourChart C ON ( UR.Colour = C.Value ) LEFT JOIN Floaties F ON (UR.Floaties = F.Value), CatheterLeakage L, PatientDetails PD WHERE L.Value = UR.Leakage AND PD.Identifier = UR.Patient;");
 INSERT INTO Queries VALUES (2, 1, "", "DROP TABLE Temp1;");
-INSERT INTO Queries VALUES (2, 2, "", "CREATE TABLE Temp1 (Patient VARCHAR(80), UDate DATE, UTime TIME, Volume INTEGER, PadVol INTEGER, Pad VARCHAR(20), Hold VARCHAR(20), Leakage VARCHAR(15), No2 BOOLEAN, Spasm VARCHAR(20), Notes TEXT);");
-INSERT INTO Queries VALUES (2, 3, "Temp1", "SELECT PD.Patient, UR.UDate, UR.UTime, UR.Volume, ( UR.PadVolume - ( CASE WHEN UR.Leakage < 2 THEN 0 ELSE ( SELECT P.Size FROM PadSizes P WHERE P.ID = UR.PadType ) - ( CASE WHEN UR.Leakage > 2 THEN ( SELECT DISTINCT PP.Size FROM PadSizes PP WHERE PP.ID = 1 ) ELSE 0 END ) END ) ) AS PadVol, PS.Brand AS Pad, H.Description AS Hold, L.Leakage, UR.No2, ( CASE WHEN UR.Spasm IS NULL THEN '-' ELSE ( SELECT S.Description FROM Spasms S WHERE UR.Spasm = S.Spasm ) END ) AS Spasm, UR.Notes FROM UrineRecord UR LEFT JOIN PadSizes PS ON ( UR.PadType = PS.ID ), Leakage L, HoldStates H, PatientDetails PD WHERE UR.Hold = H.ID AND L.Value = UR.Leakage AND PD.Identifier = UR.Patient;");
+INSERT INTO Queries VALUES (2, 2, "", "CREATE TABLE Temp1 (Patient VARCHAR(80), UDate DATE, UTime TIME, Volume INTEGER, PadVol INTEGER, Pad VARCHAR(20), Hold VARCHAR(20), Leakage VARCHAR(15), No2 BOOLEAN, Spasm VARCHAR(20), SpasmCount INTEGER, Urges INTEGER, Notes TEXT);");
+INSERT INTO Queries VALUES (2, 3, "Temp1", "SELECT PD.Patient, UR.UDate, UR.UTime, UR.Volume, ( UR.PadVolume - ( CASE WHEN UR.Leakage < 2 THEN 0 ELSE ( SELECT P.Size FROM PadSizes P WHERE P.ID = UR.PadType ) - ( CASE WHEN UR.Leakage > 2 THEN ( SELECT DISTINCT PP.Size FROM PadSizes PP WHERE PP.ID = 1 ) ELSE 0 END ) END ) ) AS PadVol, PS.Brand AS Pad, H.Description AS Hold, L.Leakage, UR.No2, ( CASE WHEN UR.Spasm IS NULL THEN '-' ELSE ( SELECT S.Description FROM Spasms S WHERE UR.Spasm = S.Spasm ) END ) AS Spasm, UR.SpasmCount, UR.Urges, UR.Notes FROM UrineRecord UR LEFT JOIN PadSizes PS ON ( UR.PadType = PS.ID ), Leakage L, HoldStates H, PatientDetails PD WHERE UR.Hold = H.ID AND L.Value = UR.Leakage AND PD.Identifier = UR.Patient;");
 INSERT INTO Queries VALUES (3, 1, "", "DROP TABLE Temp1;");
 INSERT INTO Queries VALUES (3, 2, "", "CREATE TABLE Temp1 (Patient VARCHAR(80), UDate DATE, UTime TIME, PadVol INTEGER);");
 INSERT INTO Queries VALUES (3, 3, "Temp1", "SELECT PD.Patient, UR.UDate, UR.UTime, ( UR.PadVolume - P.Size - ( CASE WHEN UR.Leakage > 2 THEN ( SELECT DISTINCT PP.Size FROM PadSizes PP WHERE PP.ID = 1 ) ELSE 0 END ) ) AS PadVol FROM UrineRecord UR, PadSizes P, PatientDetails PD WHERE P.ID = UR.PadType AND PD.Identifier = UR.Patient AND UR.PadType IS NOT NULL AND UR.Leakage > 1 AND UR.UDate > '2020-06-15';");
@@ -15,7 +15,7 @@ INSERT INTO Queries VALUES (4, 1, "", "DROP TABLE Temp1;");
 INSERT INTO Queries VALUES (4, 2, "", "CREATE TABLE Temp1 (Patient VARCHAR(80), UDate DATE, Volume INTEGER, PadVol INTEGER, Pads INTEGER);");
 INSERT INTO Queries VALUES (4, 3, "Temp1", "SELECT PD.Patient, UR.UDate, SUM(UR.Volume) AS Volume, SUM(UR.PadVolume - (CASE WHEN UR.Leakage < 2 THEN 0 ELSE (SELECT P.Size FROM PadSizes P WHERE P.ID = UR.PadType) - (CASE WHEN UR.Leakage > 2 THEN (SELECT DISTINCT PP.Size FROM PadSizes PP WHERE PP.ID = 1) ELSE 0 END) END)) AS PadVol, COUNT(UR.PadType) AS Pads FROM UrineRecord UR, PatientDetails PD WHERE PD.Identifier = UR.Patient AND UR.UDate < date('now') GROUP BY PD.Patient, UR.UDate;");
 INSERT INTO Queries VALUES (4, 4, "", "DROP TABLE Temp2;");
-INSERT INTO Queries VALUES (4, 5, "", "CREATE TABLE Temp2 AS SELECT UDate, Volume * 100.00 / (Volume + PadVol) AS PercentVol, PadVol * 100.00 / (Volume + PadVol ) AS PercentPadVol, Pads AS PadCount FROM Temp1;");
+INSERT INTO Queries VALUES (4, 5, "", "CREATE TABLE Temp2 AS SELECT Patient, UDate, Volume * 100.00 / (Volume + PadVol) AS PercentVol, PadVol * 100.00 / (Volume + PadVol ) AS PercentPadVol, Pads AS PadCount FROM Temp1;");
 UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing (i.e. you know LaTex).
 \batchmode
@@ -93,7 +93,7 @@ UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more in
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage[landscape,a4paper]{geometry}
-\geometry{verbose,tmargin=1.5cm,bmargin=1.5cm,lmargin=2cm,rmargin=2cm,headheight=0.5cm,headsep=0.5cm,footskip=0.7cm}
+\geometry{verbose,tmargin=1.5cm,bmargin=1.5cm,lmargin=1.5cm,rmargin=1.5cm,headheight=0.5cm,headsep=0.5cm,footskip=0.7cm}
 \usepackage{array}
 \usepackage{longtable}
 
@@ -127,7 +127,7 @@ UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more in
 \textbf{\huge{}Urine Records for «FIELD:1»}
 \par\end{center}}
 
-\begin{longtable}[c]{>{\raggedright}p{1.3cm}>{\raggedleft}p{1.5cm}>{\raggedleft}p{1.6cm}>{\raggedright}p{3cm}>{\raggedright}p{1.5cm}>{\raggedright}p{2.7cm}>{\centering}p{1cm}>{\raggedright}p{2.4cm}>{\raggedright}m{9cm}}
+\begin{longtable}[c]{>{\raggedright}p{1.3cm}>{\raggedleft}p{1.4cm}>{\raggedleft}p{1.4cm}>{\raggedright}p{2.5cm}>{\raggedright}p{1.4cm}>{\raggedright}p{2.3cm}>{\centering}p{1cm}>{\raggedright}p{2.0cm}>{\raggedleft}p{1.0cm}>{\raggedleft}p{1.0cm}>{\raggedright}m{8.2cm}}
 \textbf{\large{}Time} &
 \textbf{\large{}Volume} &
 \textbf{\large{}Pad Vol} &
@@ -135,17 +135,19 @@ UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more in
 \textbf{\large{}Hold} &
 \textbf{\large{}Leakage} &
 \textbf{\large{}No 2} &
-\textbf{\large{}Spasm} &
+\textbf{\large{}Spasm +} &
+\textbf{\large{}Amt} &
+\textbf{\large{}Urge} &
 \textbf{\large{}Notes}\tabularnewline
 \hline 
 \endhead
 «QUERY 2:SELECT DISTINCT Patient, date(UDate), strftime('%d/%m/%Y',date(UDate)) AS UDate2, SUM(Volume) AS Volume, SUM(PadVol) AS Vol FROM Temp1 WHERE Patient=?1  GROUP BY Patient, UDate; »
-«FIELD:3» & & & & & & & & \tabularnewline
-«QUERY 3:SELECT DISTINCT Patient, date(UDate), UTime, Volume, PadVol, Pad, Hold, Leakage, (CASE WHEN No2=1 THEN 'Y' ELSE '' END) AS No2, Spasm, Notes FROM Temp1 WHERE Patient=?1 AND UDate=?2; »
-«FIELD:3» & «FIELD:4» & «FIELD:5» & «FIELD:6» & «FIELD:7» & «FIELD:8» & «FIELD:9» & «FIELD:10» & {\scriptsize{}«FIELD:11»}\tabularnewline
+«FIELD:3» & & & & & & & & & \tabularnewline
+«QUERY 3:SELECT DISTINCT Patient, date(UDate), UTime, Volume, PadVol, Pad, Hold, Leakage, (CASE WHEN No2=1 THEN 'Y' ELSE '' END) AS No2, Spasm, SpasmCount, Urges, Notes FROM Temp1 WHERE Patient=?1 AND UDate=?2; »
+«FIELD:3» & «FIELD:4» & «FIELD:5» & «FIELD:6» & «FIELD:7» & «FIELD:8» & «FIELD:9» & «FIELD:10» & «FIELD:11» & «FIELD:12» & {\scriptsize{}«FIELD:13»}\tabularnewline
 «END QUERY 3»
 \cline{2-3} \cline{3-3} 
- & «FIELD:4» & «FIELD:5» & & & & & & \tabularnewline
+ & «FIELD:4» & «FIELD:5» & & & & & & & \tabularnewline
 «END QUERY 2»
 \end{longtable}
 
@@ -208,7 +210,7 @@ UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more in
 \hline 
 «QUERY 2:SELECT DISTINCT Patient, date(UDate), strftime('%d/%m/%Y',date(UDate)) AS UDate2, SUM(PadVol) AS Vol FROM Temp1 WHERE Patient=?1  GROUP BY Patient, UDate; »
 «FIELD:3» & & \tabularnewline
-«QUERY 3:SELECT DISTINCT Patient, date(UDate), UTime, PadVol FROM Temp1 WHERE Patient=?1 AND UDate=?2; »
+«QUERY 3:SELECT DISTINCT Patient, date(UDate), UTime, PadVol FROM Temp1 WHERE Patient=?1 AND UDate=?2 ORDER BY Patient, date(UDate), UTime; »
  & «FIELD:3» & «FIELD:4»\tabularnewline
 «END QUERY 3»
 \cline{3-3} 
@@ -239,15 +241,18 @@ db <- dbConnect(RSQLite::SQLite(), ""«PARAM:4»"")
 userids <- dbGetQuery(db, ""SELECT DISTINCT Patient FROM Temp1"")
 result  <- dbReadTable(db, tbltemp2)
 ## Plot the results
-# ploty    <- c(0,max(onemode$amp))
-# fm       <- lm(PumpPwr ~ amp, data=onemode)
-# plotx    <- c(fm[1]$coefficients[1],
-#               fm[1]$coefficients[2] * max(onemode$amp) + fm[1]$coefficients[1])
-postscript(outputfile, horizontal=FALSE,
-           onefile=FALSE,height=6, width=6,pointsize=10)
-plot(x=result$UDate,y=result$PercentVol, type=""l"", col=linecolours[1], col.axis=bordercolours,
-     xlab=""Date"", ylab=""%"", cex=1.1)
-# points(onemode$PumpPwr, onemode$amp, col=linecolours[1], pch=18)
+postscript(outputfile,horizontal=FALSE,onefile=FALSE,width=14.0,height=7.4,pointsize=10)
+plot(x=as.Date(result$UDate,format=""%Y-%m-%d""),y=result$PercentVol, type=""l"", 
+     col=linecolours[1], col.axis=bordercolours, xlab=""Date"", ylab=""%"", cex=1.1,
+     main=paste(graphtitle1,userids[1],sep=""""), sub=graphtitle2)
+lines(x=as.Date(result$UDate,format=""%Y-%m-%d""),y=result$PercentPadVol,
+     col=linecolours[2])
+par(new = TRUE)
+plot(x=as.Date(result$UDate,format=""%Y-%m-%d""),y=result$PadCount, type=""l"", 
+     col=linecolours[3],xaxt=""n"",yaxt=""n"",ylab="""",xlab="""",lty = 2,cex=1.1)
+axis(side=4)
+mtext(""Pads"", side=4, line=3)
+legend(""right"", labels, col=linecolours, lty=c(1,2,3))
 # text(xy.coords(0.8,1), pos=4, cex=1.1,
 #      eval(substitute(expression(R^2 == rsqd), 
 #                      list(rsqd = round(summary(fm)$adj.r.squared,4)))) )
@@ -265,20 +270,25 @@ q()
 WHERE ID=4;
 UPDATE Reports SET LaTex="%% LyX 2.3.2 initially created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing (i.e. you know LaTex).
-\batchmode
-\makeatletter
-\def\input@path{{/tmp/}}
-\makeatother
 \documentclass[australian]{article}
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage[landscape,a4paper]{geometry}
-\geometry{verbose,tmargin=1.5cm,bmargin=1.2cm,lmargin=2cm,rmargin=2cm,headheight=0.5cm,headsep=0.5cm,footskip=0.5cm}
+\geometry{verbose,tmargin=1.5cm,bmargin=1.2cm,lmargin=1.5cm,rmargin=1.5cm,headheight=0.5cm,headsep=0.5cm,footskip=0.5cm}
 \usepackage{graphicx}
-\usepackage{epstopdf} %converting to PDF
+\usepackage{setspace}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{babel}
+
+\makeatother
+
 \usepackage{babel}
 \begin{document}
-\includegraphics[width=1\linewidth]{result1}
+\begin{singlespace}
+\noindent \includegraphics[width=270mm,height=180mm]{result1} 
+\end{singlespace}
 \end{document}
 "
 WHERE ID=4;

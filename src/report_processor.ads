@@ -107,6 +107,8 @@ private
        -- with the matching LaTex and need to have the .eps extension, for
        -- example, "result1.eps", which should be similarly referenced in the
        -- LaTex file.
+       -- The texlive-font-utils package and its dependent ps2eps package is
+       -- required to generate the graph.
        
    procedure Generate_LaTex(for_report_id : in natural);
        -- In accordance with instructions and folding in any generated graphs,

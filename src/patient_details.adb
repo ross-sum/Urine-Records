@@ -37,7 +37,7 @@ with Gtk.GEntry, Gtk.Check_Button, Gtk.Text_Buffer, Gtk.Text_Iter;
 with Gtk.Label;
 with Glib, Glib.Values;
 with Gtk.List_Store, Gtk.Tree_Model, Gtk.Tree_View, Gtk.Tree_Selection;
-with Gtk.Tree_Row_Reference, Gtk.Tree_Selection;
+with Gtk.Tree_Row_Reference, Gtk.Tree_Selection, Gtk.Tree_View_Column;
 with Error_Log;
 with String_Conversions;
 with Urine_Record_Version;
@@ -539,7 +539,7 @@ package body Patient_Details is
                 (Object : access Gtkada_Builder_Record'Class) is
       -- Selected Row of record has changed - update fields
       use Gtkada.Builder, Gtk.Tree_View, Gtk.Tree_Selection, Gtk.List_Store;
-      use Gtk.Tool_Button, Gtk.Tree_Model;
+      use Gtk.Tool_Button, Gtk.Tree_Model, Gtk.Tree_Row_Reference;
       use Gtk.GEntry, Gtk.Text_Buffer;
       model    : Gtk.Tree_Model.Gtk_Tree_Model;
       iter     : Gtk.Tree_Model.gtk_tree_iter;
@@ -584,7 +584,7 @@ package body Patient_Details is
            (iter /= Get_Iter_First(store)));
       Gtk.Tool_Button.Set_Sensitive(Gtk.Tool_Button.Gtk_Tool_Button
           (Gtkada.Builder.Get_Object(Object, "btn_patient_ke_last")), 
-           (iter /= Get_Iter_First(store)));
+           (iter /= Get_Iter(store, Get_Path(last_row))));
    end Patient_Details_KE_Select_changed_CB;
 
    procedure Btn_Patient_KE_First_Clicked_CB 
@@ -593,8 +593,10 @@ package body Patient_Details is
       use Gtk.Tree_View, Gtk.Tree_Selection;
       store    : Gtk.List_Store.gtk_list_store;
       iter     : Gtk.Tree_Model.gtk_tree_iter;
+      path     : Gtk.Tree_Model.gtk_tree_path;
       tree_view: Gtk.Tree_View.gtk_tree_view;
       selected : Gtk.Tree_Selection.gtk_tree_selection;
+      col      : Gtk.Tree_View_Column.gtk_tree_view_column;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                      with_details => "Btn_Patient_KE_First_Clicked_CB: Start");
@@ -605,7 +607,9 @@ package body Patient_Details is
       selected  := Get_Selection(tree_view);
       -- select the row pointed to by iter and scroll to it
       Select_Iter(selected, iter);  -- set the tree view selection to iter
-      null;
+      Gtk.Tree_View_Column.Gtk_New(col);
+      path := Get_Path(store, iter);
+      Scroll_To_Cell(tree_view, path, col, false, 0.0, 0.0);
    end Btn_Patient_KE_First_Clicked_CB;
    
    procedure Btn_Patient_KE_Last_Clicked_CB 
@@ -614,8 +618,10 @@ package body Patient_Details is
       use Gtk.Tree_View, Gtk.Tree_Selection;
       store    : Gtk.List_Store.gtk_list_store;
       iter     : Gtk.Tree_Model.gtk_tree_iter;
+      path     : Gtk.Tree_Model.gtk_tree_path;
       tree_view: Gtk.Tree_View.gtk_tree_view;
       selected : Gtk.Tree_Selection.gtk_tree_selection;
+      col      : Gtk.Tree_View_Column.gtk_tree_view_column;
    begin
       Error_Log.Debug_Data(at_level => 5, 
                       with_details => "Btn_Patient_KE_Last_Clicked_CB: Start");
@@ -626,7 +632,9 @@ package body Patient_Details is
       selected  := Get_Selection(tree_view);
       -- select the row pointed to by iter and scroll to it
       Select_Iter(selected, iter);  -- set the tree view selection to iter
-      null;
+      Gtk.Tree_View_Column.Gtk_New(col);
+      path := Get_Path(store, iter);
+      Scroll_To_Cell(tree_view, path, col, false, 0.0, 0.0);
    end Btn_Patient_KE_Last_Clicked_CB;
 
    procedure Btn_Patient_KE_Add_Clicked_CB 
@@ -648,6 +656,7 @@ package body Patient_Details is
       Get_Selected(ke_select, model, current);
       if current = Null_Iter then  -- number of rows = 0
          Insert(store, new_iter, 0);
+         Select_Iter(ke_select, new_iter); -- select the new blank row
       else
          Insert_Before(store, new_iter, current);
          Previous(store, current);
@@ -680,8 +689,8 @@ package body Patient_Details is
       iter     : Gtk.Tree_Model.gtk_tree_iter;
       the_data : Glib.Values.GValue;
    begin
-      Error_Log.Debug_Data(at_level => 5, 
-                       with_details => "Btn_Patient_KE_Undo_Clicked_CB: Start");
+      Error_Log.Debug_Data(at_level=> 5, 
+                       with_details=> "Btn_Patient_KE_Undo_Clicked_CB: Start");
       -- Get previous/current record number for both patient and events
       current_record.record_number := Current(R_patient_details);
       -- Get a pointer to the row in the tree view
@@ -722,7 +731,7 @@ package body Patient_Details is
    procedure Btn_Patient_KE_Save_Clicked_CB 
                 (Object : access Gtkada_Builder_Record'Class) is
       use Gtkada.Builder, Gtk.Tool_Button;
-      use Gtk.Tree_View, Gtk.Tree_Selection;
+      use Gtk.Tree_View, Gtk.Tree_Model, Gtk.Tree_Selection;
       use GNATCOLL.SQL.Exec;
       
       function Get_Entry_Text(Builder : access Gtkada_Builder_Record'Class;
@@ -779,6 +788,7 @@ package body Patient_Details is
       selected : Gtk.Tree_Selection.gtk_tree_selection;
       model    : Gtk.Tree_Model.Gtk_Tree_Model;
       iter     : Gtk.Tree_Model.gtk_tree_iter;
+      path     : Gtk.Tree_Model.gtk_tree_path;
    begin  -- Btn_Patient_KE_Save_Clicked_CB
       Error_Log.Debug_Data(at_level => 5, 
                        with_details => "Btn_Patient_KE_Save_Clicked_CB: Start");
@@ -787,6 +797,7 @@ package body Patient_Details is
       tree_view := gtk_tree_view(Get_Object(Object, "key_events_tree_view"));
       selected  := Get_Selection(tree_view);
       Get_Selected(selected, model, iter);
+      path := Get_Path(model, iter);
       -- Get all the field values and load into the parameter list
       P_pd := (1 => +Get_Entry_Number(Object, "entry_patient_identifer"),-- Patient
                2 => +Get_Entry_Date(Object, "entry_ke_date"),      -- EventDate
@@ -818,10 +829,6 @@ package body Patient_Details is
                        with_details => "Btn_Patient_KE_Save_Clicked_CB: New");
          Execute (Connection => pDB, Stmt => KE_insert, Params => P_pd);
          Commit_Or_Rollback (pDB);
-         if Success(pDB) then -- committed, not rolled back
-            -- update the record count and go to the current record + 1
-            null;--current_record.record_number := current_record.record_number + 1;
-         end if;
       end if;
       Error_Log.Debug_Data(at_level => 6, 
                        with_details => "Btn_Patient_KE_Save_Clicked_CB: Saved");
@@ -830,8 +837,15 @@ package body Patient_Details is
          Load_Patient_Details_Data(Builder   => Gtkada_Builder(Object),
                                    record_no => current_record,
                                    refresh   => true);
-         -- then point back to the correct Event row  ****DOESN'T WORK****
-         Select_Iter(selected, iter);  -- set the tree view selection to iter
+         -- then point back to the correct Event row
+         declare
+            col      : Gtk.Tree_View_Column.gtk_tree_view_column;
+         begin
+            iter := Get_Iter(model, path);
+            Select_Iter(selected, iter);  -- set the tree view selection to iter
+            Gtk.Tree_View_Column.Gtk_New(col);
+            Scroll_To_Cell(tree_view, path, col, false, 0.0, 0.0);
+         end;
       else -- some trouble saving
          Error_Dialogue.Show_Error
              (Builder => Gtkada_Builder(Object),
@@ -1429,9 +1443,10 @@ package body Patient_Details is
          -- Select * FROM KeyEvents WHERE Patient = Patient_ID:
             Q_events := SQL_Select
                (Fields => KeyEvents.EventDate & 
-                       KeyEvents.Event & KeyEvents.Details,
-               From   => KeyEvents,
-               Where  => KeyEvents.Patient = patientid);
+                          KeyEvents.Event & KeyEvents.Details,
+               From    => KeyEvents,
+               Where   => KeyEvents.Patient = patientid,
+               Order_By=> KeyEvents.EventDate);
             R_events.Fetch (Connection => pDB, Query => Q_events);
             while Has_Row(R_events) loop  -- while not end_of_table(KeyEvents)
                Append(store, iter);

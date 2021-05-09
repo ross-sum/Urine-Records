@@ -73,7 +73,7 @@ procedure Urine_Records is
                  ", Path to GNU R graph generating tool;" &
        "l,log,string," & default_log_file_name & 
                  ",log file name with optional path;" &
-       "d,debug,integer,0,debug level (0=none, 9=max)",
+       "d,debug,integer,0,debug level (0=none 9=max)",
        0, false);
    use Parameters;
    

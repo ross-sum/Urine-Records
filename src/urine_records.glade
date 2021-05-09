@@ -478,8 +478,8 @@ Error encountered when saving the record.
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="year">2020</property>
-            <property name="month">10</property>
-            <property name="day">17</property>
+            <property name="month">2</property>
+            <property name="day">7</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -492,6 +492,7 @@ Error encountered when saving the record.
   </object>
   <object class="GtkWindow" id="form_main">
     <property name="can_focus">False</property>
+    <property name="icon">tmp/urine_records.png</property>
     <signal name="destroy" handler="form_main_destroy_cb" swapped="no"/>
     <child>
       <placeholder/>
@@ -521,6 +522,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_new_activate_cb" swapped="no"/>
                       </object>
                     </child>
@@ -531,6 +533,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                     <child>
@@ -540,6 +543,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                     <child>
@@ -555,6 +559,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_exit_select_cb" swapped="no"/>
                         <accelerator key="F4" signal="activate" modifiers="GDK_MOD1_MASK"/>
                       </object>
@@ -701,6 +706,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="help_about_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -1756,8 +1762,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -1770,8 +1776,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_next_select_cb" swapped="no"/>
-                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -1782,6 +1788,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go forward 10 records</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_cur_next_10_select_cb" swapped="no"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_MOD1_MASK"/>
                       </object>
@@ -2446,6 +2453,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_new_pd_select_cb" swapped="no"/>
                         <accelerator key="Insert" signal="activate"/>
                       </object>
@@ -2457,6 +2465,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_undo_pd_activate_cb" swapped="no"/>
                         <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
@@ -2468,6 +2477,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_save_pd_activate_cb" swapped="no"/>
                         <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
@@ -2479,6 +2489,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_delete_pd_activate_cb" swapped="no"/>
                         <accelerator key="Delete" signal="activate"/>
                       </object>
@@ -2496,6 +2507,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="file_close_pd_select_cb" swapped="no"/>
                         <accelerator key="F4" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
@@ -2521,6 +2533,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                     <child>
@@ -2530,6 +2543,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                     <child>
@@ -2539,6 +2553,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                     <child>
@@ -2548,6 +2563,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                     </child>
                   </object>
@@ -2571,6 +2587,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="btn_patient_ke_add_clicked_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2581,6 +2598,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="btn_patient_ke_undo_clicked_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2591,6 +2609,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="btn_patient_ke_save_clicked_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2601,6 +2620,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="btn_patient_ke_remove_clicked_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2626,6 +2646,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go to the first record</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_pd_first_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2637,6 +2658,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go to the previous record</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_pd_prev_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2648,6 +2670,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go to the next record</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_pd_next_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2659,6 +2682,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go to the last record</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_pd_last_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -2683,6 +2707,7 @@ Error encountered when saving the record.
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="help_about_select_cb" swapped="no"/>
                       </object>
                     </child>
@@ -3867,8 +3892,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_prev_select_cb" swapped="no"/>
-                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Left" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="Home" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3881,8 +3906,8 @@ Error encountered when saving the record.
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_next_select_cb" swapped="no"/>
-                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="End" signal="activate" modifiers="GDK_SHIFT_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -3893,6 +3918,7 @@ Error encountered when saving the record.
                         <property name="tooltip_text" translatable="yes">Go forward 10 records</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="view_ur_next_10_select_cb" swapped="no"/>
                         <accelerator key="Right" signal="activate" modifiers="GDK_MOD1_MASK"/>
                       </object>
@@ -4702,31 +4728,32 @@ Error encountered when saving the record.
     </child>
   </object>
   <object class="GtkTextBuffer" id="textbuffer_manual">
-    <property name="text" translatable="yes">&lt;H1&gt;General&lt;/H1&gt;
+    <property name="text" translatable="yes">General
+=====
 
 Urine Records is designed to assist patients such as prostate cancer recovery patients record urine volume levels post operation.  It records catheter bag volumes post surgery and urine volumes post catheter removal.  The application allows for patients to record spasms should they encounter such a side-effect, as well as urges, in terms of numbers experienced prior to urination.  For spasms, it also records intensity.  By default, these are based on the amount of force and therefore the amount of leakage (assuming a strong spasm causes overflow from the pad into underwear and a very strong spasm causes overflow to soak through trousers).
 
 Generally, the instruments you require are a graduated jug (you can purchase a cheap jug and then graduate using a marker pen and syringes from the hospital if necessary), perhaps a small graduated jar (useful when passing stools and also recording urine volumes) and gram-accurate scales.  To help with recording catheter bag volumes, a 2 litre jug is useful.
 
-&lt;H2&gt;To Do:&lt;/H2&gt;
+To Do:
+-------
 Outstanding features required of the application are a means of editing each of the look-up tables.  This will allow, for instance, a patient to change the way spasm strengths are recorded.
 
-The Events table in the Patient Details form is unfinished.  It should allow editing on the List tab, but currently does not.  All editing must be done from the Zoom tab.  Further, Going to the start and end, while selecting the first or last record, does not actually scroll the window to make those visible yet.  Finally, on save, the selected row in the Events table that being edited does not get reselected.
+The Events table in the Patient Details form is unfinished.  It should allow editing on the List tab, but currently does not.  All editing must be done from the Zoom tab.
 
-Also for the Events table in  the Patient Details form, do not jump back to List from Zoom when creating the record until you press Save as all data will be lost.  That doesn't work.  Do not create until exited application and then come back in.  It will not create the new record at first creation of the patient.
-
-The selected field being a default landing position at the first field on the form doesn't yet work for any form.
+The selected field being a default landing position, for instance when selecting File|New, at the first field on the form doesn't yet work for any form.
 
 Cut, Copy and Paste buttons and menu do not work on any of the data entry forms yet.
 
-The Catheter Urine Records form and the Urine Records Form do not update the drop-down list of patients when the Patient Details form is updated with a new record.  You currently need to exit the application and reload it in order to refresh the list of patients.
+This Manual should be displayed using a mark-up to highlight headings and the like.  At the moment it does not do that, rather it just displays plain text (with the mark-up/mark-down displayed as plain text).
 
-This Manual should be displayed using a mark-up to highlight headings and the like.  At the moment it does not do that, rather it just displays plain text (with the mark-up displayed as plain text).
-
-&lt;H2&gt;Updates&lt;/H2&gt;
+Updates
+--------
 Updates are available from Hyper Quantum's website, www.hyperquantum.com, or in particular from the ftp website ftp.hyperquantum.com.  The application is also available on GitHub in source code format.  Written in Ada, it can be compiled to run on pretty much any operating system.
 
-&lt;H1&gt;Patient Details&lt;/H1&gt;
+Patient Details
+=========
+
 Patient Details must be set up as the very first operation with this application.  A patient is required for recording volumes for both the catheter and straight urine expulsion against.
 
 For Patient Details, there is a separate tool bar for the Events table.  This tool bar must be used for editing the Events table.  The main tool bar only applies to the main Patient Details information, not the Events table.
@@ -4738,7 +4765,8 @@ The Events sub-table is for recording significant events, for instance, when the
 
 To create a new Event, click on the New button on the Events tool bar (the vertical tool bar next to the Events table).  Then click on the Zoom tab to enter details for this event.  The event date can be selected using a date picker by clicking on the small button within the Date entry box.  The event takes a short title and has an unlimited length description field to enter details about the event into.  When done, press the Save button on the Events tool bar.
 
-&lt;H1&gt;Catheter Urine Records&lt;/H1&gt;
+Catheter Urine Records
+==============
 
 The Catheter Urine Records form allows the entry of information relating to the catheter.  It records details of whenever the bag is emptied.  Details recorded are the volume, the colour of the urine (used to identify the amount of blood still leaking into the urine, in addition to other matters such as whether enough water is being consumed), leakage into a pad (it can be that there is some leakage, for instance if you endure spasms - this can be a side effect of the catheter being in for an extended period of time for instance), and whether there are any particles ("floaties") such as blood clots or other material in the urine.
 
@@ -4746,10 +4774,30 @@ To create a new record, click on the New button on the tool bar or select File|N
 
 To move between records, Ctrl-&lt;right arrow&gt; goes forward, Ctrl-&lt;left arrow&gt; goes backward.  View menu contains the menu entries for record movement.
 
-&lt;H1&gt;Urine Records&lt;/H1&gt;
+Urine Records
+=========
 
-&lt;H1&gt;Reports&lt;/H1&gt;
-&lt;H2&gt;Introduction&lt;/H2&gt;
+Urine Records is where, after you have the catheter removed, you record your urine volumes and pad volumes (actually, the pad weight, including urine, which the system back calculates the urine volume in the pad from).  It also records the leakage noticed, the number of urges experienced between emptying the bladder and the intensity an number of spasms.  For completeness, it records when stools are passed, since this is a statistic that influences other urine data.  You can use a small jar for capturing urine when passing stools and, if large volumes of urine are involved, often this can be captured in a large container prior to passing stools.
+
+To create a new entry, click on the New button or choose File|New (short-cut is Insert).  If there is only one patient, then this will default, otherwise select from the drop-down list.  The date will be selected as the current date.  If necessary change this by either over typing or alternatively select from the date picker by clicking on the icon in the edit box for Date.  The time also defaults to the current time.  Over type to change.
+Enter the volume and, if the pad or nappy was changed, enter the weight.  Otherwise leave that pad weight at the default of 0.  If the pad was changed select the type and also adjust leakage to Pad Change or whatever is the appropriate selection.  If no pad change, then appropriately select leakage to be either None or Some as appropriate.  Hold is for recording the success of being able to hold the flow mid-stream.  It is not uncommon, particularly somewhat early in the piece, for the urologist to want you to try this about 3 times a day.  The Notes field is a free form entry field of unlimited length.  It might be a good idea to record things like the pre and during urine volumes amount when doing a bowel motion.  Any other important details that should be brought to the urologist's attention can be recorded here.
+
+Tab will tab between fields and Home and End will move to the start of text or end of text within a field.  Shift-&lt;left arrow&gt; and Shift-&lt;right arrow&gt; will select text within a field as you might expect.
+
+To save, press the Save button or choose File|Save (short-cut is Ctrl-s).
+
+Undo (File|Undo from the menus, short-cut Ctrl-z) undoes any changes and reverts back.
+
+Delete (File|Delete from the menus) will confirm that you really mean to delete the record then, if you click OK, will delete the currently visible urine recording record.
+
+To move between records, Ctrl-&lt;right arrow&gt; goes forward, Ctrl-&lt;left arrow&gt; goes backward.  Alt-&lt;left arrow&gt; goes back 10 records and Alt-&lt;right arrow&gt; goes forward 10 records.  Ctrl-Home goes to the first urine recording and Ctrl-End goes to the last urine recording.  View menu contains the menu entries for record movement.
+
+Reports
+=====
+
+Introduction
+------------
+
 The Reports  processes queries ready for a report.   It  then  takes  the  output of those queries (in temporary tables  in  a  temporary  database) and produces a report.  The report may  be  either  tabular  or graphical.  The output is LaTex,  which  is  then processed by pdflatex, which produces a PDF file ready for printing.  The PDF file is displayed with a PDF viewer; on Linux this is typically xPDF.
 
 The reports are stored in the Reports table and related queries are stored in the Queries table.  The list of reports in the Reports menu is generated at application start-up from the Reports table.
@@ -4762,7 +4810,9 @@ The reports generation tool is made up of the following components:
   . Generate_LaTex
   . Display_Report
 
-&lt;H2&gt;Initialise&lt;/H2&gt;
+Initialise
+--------
+
 Initialise sets up details about the database that will be operated on by the SQL queries.  It is also the location where the SQL queries are kept, in the Queries table, pointed to by the Reports table.  Additionally, initialise sets up the temporary database where the results of the queries are stored and, if necessary, further manipulated.
 
 Initialise also configures, ultimately from the command line, the following parameters:
@@ -4772,23 +4822,31 @@ Initialise also configures, ultimately from the command line, the following para
 
 Initialise also configures the path to the temporary directory, which is set to be consistent with the operating system type (e.g. it is /tmp under Linux).
 
-&lt;H2&gt;Run_The_Report&lt;/H2&gt;
+Run_The_Report
+-----------------
+
 Run the specified report number, executing the queries pointed to by the report number in their numerical sequence, then, if required, generating any diagrams or graphs, then generating the LaTex and finally producing a PDF using pdf2latex.
 
 Using nesting, the reports may have groups (and groups within groups) as group headers and footers to contain detailed data.   All data used in the report is taken from a temporary database, temp.db, which is stored in the temporary directory (/tmp/ on Unix).  This database is in SQLite (version 3) format, so this module is compiled with the GNATCOLL.SQL.Sqlite package.
 
 Full details on the syntax or format is with the sub-component declarations in the sub-sections below.
 
-&lt;H2&gt;Run_Queries&lt;/H2&gt;
+Run_Queries
+-------------
+
 In the specified sequence, run the report queries.  If the TargetTbl field contains a value (that is, is not blank), then the data is drawn (in all cases) from the main database and the result of the query is dumped into the temp.db.  If the TargetTbl field is blank or null, then the query operates entirely on the temporary database, temp.db.
 
-&lt;H2&gt;Generate_Graphs&lt;/H2&gt;
+Generate_Graphs
+------------------
+
 Following the loaded up instructions, generate graphs using R.  It requires the RSQLite package for GNU R to be installed.
  
 The outputted encapsulated postscript graph files, stored in the specified temporary directory, need to have their names synchronised with the matching LaTex and need to have the .eps extension, for example, "result1.eps", which should be similarly referenced in the LaTex file.
 
-&lt;H2&gt;Generate_LaTex&lt;/H2&gt;
-In accordance with instructions and folding in any generated graphs, output the LaTex that describes the report.  The LaTex, stored in the LaTex field of the Reports table, is processed line by line.  Lines starting with a chevron and the word Query and a number («QUERY &lt;num&gt;:) and terminated by the closing chevron (»)are treated specially.  The query encapsulated in between is executed on the temporary database and then, for each row returned in the result set, the following rows, up to the closing chevron encapsulated «END QUERY &lt;num&gt;» statement, are processed recursively.  These two statements need to be on their own line.
+Generate_LaTex
+----------------
+
+In accordance with instructions and folding in any generated graphs, output the LaTex that describes the report.  The LaTeX, stored in the LaTeX field of the Reports table, is processed line by line.  Lines starting with a chevron and the word Query and a number («QUERY &lt;num&gt;:) and terminated by the closing chevron (»)are treated specially.  The query encapsulated in between is executed on the temporary database and then, for each row returned in the result set, the following rows, up to the closing chevron encapsulated «END QUERY &lt;num&gt;» statement, are processed recursively.  These two statements need to be on their own line.
 
 Substitution of parameters into the query from the parent query is via the "?" statement as is standard for SQLite, but you need to make sure that the number of "?" is no more than the number of parameters available.  The parameter number follows the "?", for instance to push in parameter 2, it would be "?2".
 
@@ -4799,6 +4857,7 @@ Encapsulated postscript files, generated by the Generate_Graphs process, are ref
   </object>
   <object class="GtkDialog" id="dialogue_manual">
     <property name="can_focus">False</property>
+    <property name="default_width">350</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
     <child>
