@@ -27,11 +27,11 @@
    --  Floor, Boston, MA 02110-1301, USA.                               --
    --                                                                   --
    -----------------------------------------------------------------------
- with Generic_Versions;
+with Generic_Versions;
 package ToBase64_Version is
 
    package ToBase64_Versions is new Generic_Versions
-   ("1.0.0", "Urine_Records");
+   ("1.0.0", "ToBase64");
 
    function Version return wide_string 
    renames ToBase64_Versions.Version;

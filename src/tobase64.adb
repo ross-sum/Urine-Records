@@ -68,11 +68,11 @@ procedure ToBase64 is
    base64_file : Ada.Text_IO.File_Type;
 begin
    ToBase64_Version.Register(revision => "$Revision: 1.0 $",
-      for_module => "Urine_Records");
+      for_module => "ToBase64");
    if  Parameters.is_invalid_parameter or
    Parameters.is_help_parameter or
    Parameters.is_version_parameter then
-      -- abort Urine_Records;
+      -- abort ToBase64;
       return;
    end if;
    Error_Log.Set_Log_File_Name(Value(Parameter(with_name=>Value("log"))));
