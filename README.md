@@ -21,5 +21,8 @@ available on Linux (or any X-Window style Unix).
 This software is licensed under the terms and conditions of the GPL.
 
 ## Installation
+Prior to installation, create the necessary directories to build into:
+   `mkdir obj_amd64  obj_arm  obj_pi  obj_pi64  obj_x86`
+
 To install, type `make` at the  top level directory, then type `sudo make install`.
 

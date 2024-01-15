@@ -31,12 +31,14 @@ with "adasockets";
 with "../dynamic-strings/dstrings";
 project ToBase64 is
 
-   type Hware_Option is ("sparc", "amd64", "x86", "pi");
+   type Hware_Option is ("sparc", "amd64", "x86", "pi", "pi64");
    Hware : Hware_Option := external ("hware", "amd64");
 
    for Languages use ("ada");
    case Hware is
    when "pi" =>
+      for Source_Dirs use ("src/", "../tools/");
+   when "pi64" =>
       for Source_Dirs use ("src/", "../tools/");
    when others =>
       for Source_Dirs use ("src/", "../tools/");
